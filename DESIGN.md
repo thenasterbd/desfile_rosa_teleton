@@ -2,7 +2,7 @@
 
 ## Uso y prioridades
 
-Una herramienta de recaudación para un evento en vivo. El importe confirmado,
+Una herramienta de recaudación para el evento Desfile Rosa 2026. El importe confirmado,
 la meta y el último aporte deben leerse antes que los controles o la decoración.
 La vista de operador prioriza velocidad, legibilidad y confirmación de escritura.
 La proyección y los formularios usan la misma identidad, con densidades diferentes.
@@ -12,10 +12,14 @@ Valle de Santiago y los colores de marca `#e4c0d6` y `#e0014d`.
 
 ## Tipografías solicitadas
 
-- Principal: **CocogooseProTrial**, para títulos y marca. La regla `@font-face`
-  busca la fuente instalada localmente por su nombre. **Falta el archivo webfont
-  del propietario para servirla a todos los dispositivos**. No se afirma que
-  esté incluida ni se referencia un archivo inexistente. Respaldo: Quicksand.
+- Principal: **CocogooseProTrial**, servida localmente desde
+  `assets/fonts/cocogoose/`. Las 15 variantes del ZIP proporcionado por el
+  propietario están convertidas a WOFF2, conservando sus glifos, metadatos y pesos.
+  Se incluyen Regular (400), Bold (700), Light (300), Semilight (350), Thin (100),
+  Ultralight (200), Darkmode (370) y sus cursivas. Letterpress usa la familia
+  independiente `CocogooseProLetterpressTrial`. La licencia original del paquete
+  está incluida como `assets/fonts/cocogoose/License.pdf`.
+  Los títulos usan Regular y los encabezados de panel Semilight.
 - Secundaria: **Quicksand Book**, texto de lectura a peso 400 y controles a
   500–600. La familia variable Quicksand de Google Fonts está alojada en
   `assets/fonts/Quicksand.ttf`; su licencia OFL se incluye al lado del archivo.
@@ -68,7 +72,7 @@ consultadas en el commit `4f69a426689bbd471c8f0774c13378e651ae7de8`:
 
 Se usan como criterio de diseño, con código propio para esta SPA. No se ejecuta
 el workspace de OpenDesign ni se agregan sus servicios como dependencia de la web.
-El brief del propietario prevalece: rosa de marca y tipografías solicitadas.
+El brief del propietario prevalece: rosa de marca y tipografías solicitadas. El logo del evento está en `assets/desfile-rosa-2026.png` y se muestra con fondo transparente en el proyector, conservando el logo de Rotaract como organizador.
 
 ## Validación
 

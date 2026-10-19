@@ -1,8 +1,6 @@
 /* Design direction: OpenDesign's redesign-existing-projects + craft rules.
    Project-specific decisions and source links are recorded in DESIGN.md. */
-/* CocogooseProTrial uses the exact locally installed font when available.
-   A distributable webfont file is still required to serve it to every device. */
-@font-face { font-family: 'CocogooseProTrial'; src: local('CocogooseProTrial'), local('CocogooseProTrial-Regular'), local('Cocogoose Pro Trial'), local('Cocogoose Pro Trial Regular'); font-weight: 400; font-style: normal; font-display: swap; }
+@import url('../assets/fonts/cocogoose/cocogoose.css');
 @font-face { font-family: 'Quicksand Book'; src: url('../assets/fonts/Quicksand.ttf') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap; }
 :root {
   --bg: #fcf5f8;
@@ -50,7 +48,7 @@ button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; color: var(--action); }
 .brand-mark .icon { width: 23px; height: 23px; }
-.brand > span:last-child { font: 600 24px/1.2 var(--font-display); letter-spacing: -.03em; }
+.brand > span:last-child { font: 400 21px/1.2 var(--font-display); letter-spacing: -.03em; }
 .brand small { display: block; font: 500 9px/1.5 var(--font-body); letter-spacing: .08em; margin-top: 6px; color: var(--muted); }
 nav { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); padding: 6px; border-radius: 14px; }
 nav a { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; min-height: 44px; border-radius: 9px; color: var(--muted); font-size: 12px; font-weight: 500; transition: background .22s var(--motion), color .22s var(--motion); }
@@ -68,9 +66,11 @@ main { max-width: 1600px; padding: 0 5%; margin: auto; }
 .eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 18px; color: var(--muted); font-size: 11px; line-height: 1.5; font-weight: 500; letter-spacing: .08em; }
 .eyebrow-line { display: inline-block; width: 26px; height: 1px; background: currentColor; }
 h1, h2, h3, p { overflow-wrap: anywhere; }
-h1 { font: 600 clamp(36px, 4.2vw, 60px)/1.1 var(--font-display); letter-spacing: -.035em; margin: 0 0 16px; text-wrap: balance; }
+h1 { font: 400 clamp(36px, 4.2vw, 60px)/1.1 var(--font-display); letter-spacing: -.035em; margin: 0 0 16px; text-wrap: balance; }
 h1 span { color: var(--action); }
 .campaign-title { font: 600 clamp(54px, 6.1vw, 90px)/1.05 var(--font-display); letter-spacing: -.045em; margin: 0; text-wrap: balance; }
+.campaign-logo { line-height: 0; }
+.event-logo { display: block; width: min(100%, 340px); height: auto; }
 .campaign-title em { color: var(--action); font-weight: inherit; }
 .campaign-caption { max-width: 52ch; font-size: 14px; line-height: 1.7; color: var(--muted); margin: 20px 0 0; }
 .campaign-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
@@ -145,6 +145,7 @@ footer > span:last-child { font-size: 9px; letter-spacing: .08em; }
 /* Workspaces share typography, spacing and interaction tokens with the projection. */
 .operator-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 26px; }
 .panel { padding: 30px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; margin-bottom: 26px; min-width: 0; }
+.panel h2 { font-family: var(--font-display); font-weight: 350; font-size: 20px; }
 label { display: block; color: var(--fg); font-size: 12px; line-height: 1.5; font-weight: 600; letter-spacing: .02em; margin: 24px 0 10px; }
 label span { float: right; color: var(--muted); font-size: 11px; font-weight: 400; letter-spacing: 0; }
 input:not([type=checkbox]), textarea { width: 100%; padding: 13px 15px; border: 1px solid var(--control-border); border-radius: var(--radius-control); background: var(--surface); color: var(--fg); transition: border-color .22s var(--motion), background .22s var(--motion); }
@@ -203,7 +204,8 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 :fullscreen body { overflow: auto; }
 :fullscreen .topbar, :fullscreen footer, :fullscreen .bottom-note, :fullscreen #first-donation { display: none; }
 :fullscreen main { max-width: 1800px; padding-top: 20px; }
-:fullscreen .campaign-header { padding: 24px 0 20px; border: 0; }
+:fullscreen .campaign-header { padding: 12px 0 16px; border: 0; }
+:fullscreen .event-logo { width: 275px; }
 :fullscreen .total-card { padding: 40px 48px; }
 :fullscreen .total { font-size: clamp(80px, 15cqw, 190px); }
 :fullscreen .total.long-total { font-size: clamp(30px, 8cqw, 110px); }
@@ -243,15 +245,16 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   .campaign-header { grid-template-columns: minmax(0, 1fr); padding: 28px 0 22px; gap: 24px; }
   .eyebrow { font-size: 10px; margin-bottom: 14px; }
   .campaign-title { font-size: clamp(44px, 11vw, 72px); }
+  .event-logo { width: min(100%, 300px); }
   .campaign-caption { font-size: 13px; margin-top: 16px; }
   .campaign-side { flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; }
   .organizer-label { font-size: 11px; }
   .organizer { width: 185px; max-width: 60%; }
-  .section-heading { gap: 16px; align-items: flex-start; margin: 26px 0 22px; }
+  .section-heading { flex-direction: column; gap: 16px; align-items: flex-start; margin: 26px 0 22px; }
   h1 { font-size: 37px; }
   h1:not(.campaign-title) span { display: block; }
-  .section-heading > .pill { max-width: 125px; font-size: 9px; }
-  .projector-intro { align-items: center; margin: 0 0 16px; }
+  .section-heading > .pill { order: -1; max-width: none; font-size: 10px; }
+  .projector-intro { flex-direction: row; align-items: center; margin: 0 0 16px; }
   .projector-note { font-size: 11px; }
   .projector-note em { display: block; font-size: 17px; margin: 3px 0 0; }
   .projector-intro > .button { padding: 10px 12px; }
