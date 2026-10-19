@@ -16,9 +16,9 @@ export function cents(value) {
 }
 const listeners = new Set();
 const mode = new URLSearchParams(location.search).get('demo') === '1' ? 'demo' : 'supabase';
-let state = initial(), history = [], connection = 'Iniciando…', ready = false, user = null, isAdmin = false, client, realtime = false, sessionRevision = 0;
-export function subscribe(fn) { listeners.add(fn); fn({ state, history, mode, connection, ready, user, isAdmin }); return () => listeners.delete(fn); }
-function emit() { for (const fn of listeners) fn({ state, history, mode, connection, ready, user, isAdmin }); }
+let state = initial(), history = [], connection = 'Iniciando…', ready = false, user = null, isAdmin = false, isOwner = false, client, realtime = false, sessionRevision = 0;
+export function subscribe(fn) { listeners.add(fn); fn({ state, history, mode, connection, ready, user, isAdmin, isOwner }); return () => listeners.delete(fn); }
+function emit() { for (const fn of listeners) fn({ state, history, mode, connection, ready, user, isAdmin, isOwner }); }
 function readLocal() {
   const raw = localStorage.getItem(STATE_KEY);
   const data = raw ? JSON.parse(raw) : { state: initial(), history: [] };
@@ -119,12 +119,17 @@ export async function resetEvent() {
 }
 async function applySession(session) {
   const revision = ++sessionRevision;
-  user = session?.user || null; isAdmin = false; emit();
+  user = session?.user || null; isAdmin = false; isOwner = false; emit();
   if (user) {
     const { data, error } = await client.from('operators').select('user_id').eq('user_id', user.id).maybeSingle();
     const authorized = !error && !!data;
     if (revision !== sessionRevision) return authorized;
     isAdmin = authorized; emit();
+    if (authorized) {
+      const { data: principal, error: ownerError } = await client.from('user_administration').select('user_id').eq('user_id', user.id).maybeSingle();
+      if (revision !== sessionRevision) return authorized;
+      isOwner = !ownerError && !!principal; emit();
+    }
     return authorized;
   }
 }
@@ -134,6 +139,17 @@ export async function login(email, password) {
   if (error) throw new Error(databaseError(error));
   const authorized = await applySession(data.session);
   if (!authorized) throw new Error('Tu cuenta no tiene acceso al panel. Contacta a la organización.');
+}
+export async function createOperator(email, password) {
+  if (!client || !isOwner) throw new Error('Solo la cuenta principal puede registrar usuarios.');
+  const { data, error } = await client.functions.invoke('create-operator', { body: { email, password } });
+  if (error) {
+    let message;
+    try { message = (await error.context?.json())?.message; } catch { /* Sin respuesta JSON disponible. */ }
+    throw new Error(message || 'No se pudo registrar al usuario. Comprueba la conexión y vuelve a intentarlo.');
+  }
+  if (!data?.message) throw new Error('No se pudo confirmar el registro. Comprueba la cuenta antes de volver a intentarlo.');
+  return data.message;
 }
 export async function logout() {
   if (!client) return;
@@ -152,7 +168,7 @@ export async function initialize() {
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
     client = createClient(supabaseConfig.url, supabaseConfig.publishableKey);
     // No esperar llamadas Auth dentro del callback: Supabase mantiene un bloqueo interno.
-    client.auth.onAuthStateChange((_event, session) => { setTimeout(() => { applySession(session).catch(() => { isAdmin = false; emit(); }); }, 0); });
+    client.auth.onAuthStateChange((_event, session) => { setTimeout(() => { applySession(session).catch(() => { isAdmin = false; isOwner = false; emit(); }); }, 0); });
     client.channel('desfile-rosa-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => { refresh(); })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, () => { refresh(); })

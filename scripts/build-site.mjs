@@ -32,7 +32,11 @@ const versioned = path => `${path.split('?')[0]}?v=${version}`;
 // _site is the generated publication directory; repository sources stay untouched.
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
-for (const entry of publicRoots) await cp(join(root, entry), join(output, entry), { recursive: true });
+for (const entry of publicRoots) await cp(join(root, entry), join(output, entry), {
+  recursive: true,
+  // Las funciones administrativas son código del servidor, no archivos públicos.
+  filter: source => source !== join(root, 'supabase', 'functions') && source !== join(root, 'supabase', 'config.toml')
+});
 
 // Version the complete module graph, including the operator's import of app.js.
 // Versioning only the entry would instantiate app.js twice through that cycle.

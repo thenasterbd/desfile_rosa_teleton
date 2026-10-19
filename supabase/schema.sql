@@ -207,4 +207,16 @@ begin
 end $$;
 revoke all on function public.edit_donation(uuid, uuid, bigint, text, text, jsonb) from public, anon;
 grant execute on function public.edit_donation(uuid, uuid, bigint, text, text, jsonb) to authenticated;
+create table if not exists public.user_administration (
+  id integer primary key check (id = 1),
+  user_id uuid not null unique references public.operators(user_id) on delete cascade
+);
+alter table public.user_administration enable row level security;
+revoke all on public.user_administration from anon, authenticated;
+grant select on public.user_administration to authenticated;
+drop policy if exists administrator_self_read on public.user_administration;
+create policy administrator_self_read on public.user_administration for select to authenticated
+  using (user_id = (select auth.uid()));
+grant select on public.user_administration to service_role;
+grant select, insert, delete on public.operators to service_role;
 commit;

@@ -21,7 +21,7 @@ El proyecto público de Supabase ya está configurado en `js/supabase-config.js`
 2. Copia el **User UID** de esa cuenta.
 3. En **Table Editor → operators → Insert row**, pega ese UUID en `user_id` y guarda. No necesitas rellenar otro campo. Crear una cuenta en Authentication por sí solo no autoriza operaciones.
 4. Abre la web → **Meta y ajustes**, inicia sesión con esa cuenta y guarda la meta. Los visitantes pueden abrir el proyector sin iniciar sesión.
-5. Para revocar un operador elimina su fila en `operators`. La base de datos rechaza inmediatamente las próximas escrituras aunque una pantalla aún muestre una sesión abierta. La app no incluye registro público; puedes desactivar nuevos registros en Authentication si no los necesitas.
+5. Para revocar un operador elimina su fila en `operators`. La base de datos rechaza inmediatamente las próximas escrituras aunque una pantalla aún muestre una sesión abierta. El registro de operadores se realiza solo desde el menú de la cuenta principal; desactiva el registro público en Authentication → Providers → Email para impedir el alta abierta de cuentas.
 
 Sin sesión autorizada, **Meta y ajustes** muestra únicamente el formulario de ingreso. **Panel operador** aparece en gris y lleva al formulario, incluso desde un enlace directo. Tras iniciar sesión se habilitan el panel, la meta y el reinicio. Puedes cerrar sesión desde el menú junto a **Meta y ajustes** o al pie de **Meta global**. El modo de prueba conserva los controles locales sin requerir una cuenta.
 
@@ -71,3 +71,20 @@ Tras ejecutar el SQL y crear el operador, abre dos dispositivos con el mismo pro
 En **Panel operador**, pulsa **Editar** junto al aporte para corregir monto, nombre o mensaje. La fecha y la cantidad de aportes se conservan; el total y el último aporte se actualizan en todas las pantallas. Si otro operador lo modificó, vuelve a abrir el formulario antes de guardar.
 
 Para una base de datos ya instalada, ejecuta `supabase/migrations/20261019_edit_donation.sql` en **Supabase → SQL Editor**. No borra datos. Las instalaciones nuevas pueden ejecutar directamente `supabase/schema.sql`, que ya incluye la función de edición. La edición requiere un operador autorizado y solo admite aportes del evento actual.
+
+
+### Registro de operadores desde la cuenta principal
+
+La cuenta principal confirmada es `bladimirduarte30@gmail.com`. Solo esa cuenta verá **Meta y ajustes → Registrar usuario**. Las cuentas nuevas pueden registrar y editar aportes, cambiar la meta y usar los ajustes del evento, pero no crear usuarios. El alta no cambia la sesión de la cuenta principal y no envía un correo: el principal entrega el correo y la contraseña de forma privada al operador.
+
+Activación en el proyecto existente:
+
+1. Ejecuta `supabase/migrations/20261019_user_management.sql` en **Supabase → SQL Editor**. La cuenta principal debe existir en Authentication. La migración conserva las donaciones y los operadores existentes.
+2. Despliega la Edge Function desde la raíz del repositorio con Supabase CLI: `supabase login`, después `supabase functions deploy create-operator --project-ref ijbyhoiwfpdlgviuoedo`. Usa el archivo `supabase/config.toml` incluido. La función verifica el token con Auth y comprueba la cuenta principal en cada solicitud.
+3. En **Authentication → Providers → Email**, desactiva **Allow new users to sign up**. Las altas administrativas de la función siguen funcionando. Cierra e inicia sesión con la cuenta principal para cargar su menú.
+
+La función usa `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`, que Supabase proporciona en su servidor. Nunca copies la clave administrativa en la web ni en GitHub. El origen permitido por defecto es `https://thenasterbd.github.io`; si usas otro dominio, configura `ALLOWED_ORIGINS` en los secretos de la función con los orígenes separados por comas. La tabla `user_administration` solo permite que un usuario lea su propio permiso: los clientes no pueden escribir en ella ni en `operators`.
+
+Para instalaciones nuevas, ejecuta `supabase/schema.sql`, crea la cuenta principal en Authentication y luego ejecuta la migración de administración. Las funciones de servidor no se publican como archivos estáticos de GitHub Pages.
+
+Verifica las comprobaciones del servidor con `node --test tests/create-operator.test.mjs`. Son pruebas locales con respuestas simuladas de Auth y base de datos; no crean cuentas reales.

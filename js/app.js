@@ -1,4 +1,4 @@
-import { initialize, subscribe, login, logout, setGoal, resetEvent } from './supabase-config.js';
+import { initialize, subscribe, login, logout, createOperator, setGoal, resetEvent } from './supabase-config.js';
 import { setupOperator } from './operador.js';
 import { setupProjector } from './proyector.js';
 const $ = selector => document.querySelector(selector);
@@ -77,6 +77,23 @@ document.querySelectorAll('[data-logout]').forEach(button => button.addEventList
   catch (error) { setAccountMenu(false); toast(errorMessage(error)); }
   finally { document.querySelectorAll('[data-logout]').forEach(el => { el.disabled = false; }); }
 }));
+let creatingUser = false;
+$('#open-user-registration').addEventListener('click', () => {
+  setAccountMenu(false); $('#user-form').reset(); feedback('#user-feedback', ''); $('#user-dialog').showModal(); $('#user-email').focus();
+});
+$('#cancel-user').addEventListener('click', () => { $('#user-form').reset(); $('#user-dialog').close(); });
+$('#user-dialog').addEventListener('cancel', e => { if (creatingUser) e.preventDefault(); });
+$('#user-dialog').addEventListener('close', () => { $('#user-form').reset(); });
+$('#user-form').addEventListener('submit', async e => {
+  e.preventDefault(); if (creatingUser) return;
+  if ($('#user-password').value !== $('#user-password-confirm').value) { feedback('#user-feedback', 'Las contraseñas no coinciden.', true); $('#user-password-confirm').focus(); return; }
+  creatingUser = true; feedback('#user-feedback', 'Creando usuario…');
+  const email = $('#user-email').value.trim(), password = $('#user-password').value;
+  $('#user-form').querySelectorAll('input, button').forEach(el => { el.disabled = true; });
+  try { const message = await createOperator(email, password); $('#user-form').reset(); $('#user-dialog').close(); toast(message); }
+  catch (error) { feedback('#user-feedback', errorMessage(error), true); }
+  finally { creatingUser = false; $('#user-form').querySelectorAll('input, button').forEach(el => { el.disabled = false; }); }
+});
 $('#goal-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('button'); button.disabled = true; try { await setGoal($('#goal-input').value); feedback('#goal-feedback', 'Meta guardada.'); } catch (error) { feedback('#goal-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 $('#reset').addEventListener('click', () => { $('#reset-form').reset(); feedback('#reset-feedback', ''); $('#reset-dialog').showModal(); });
 document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => {
@@ -93,7 +110,7 @@ const connectionDelay = setTimeout(() => {
 }, 15000);
 $('#retry-connection').addEventListener('click', () => location.reload());
 $('#empty-start').addEventListener('click', () => $('#amount').focus());
-subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
+subscribe(({ mode, connection, ready, user, isAdmin, isOwner, state }) => {
   if (ready) { hasEventData = true; clearTimeout(connectionDelay); }
   document.body.classList.toggle('pending-data', !hasEventData);
   $('.live-layout').setAttribute('aria-busy', String(!hasEventData));
@@ -111,6 +128,8 @@ subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
   $('#operator-mode').textContent = mode === 'demo' ? 'Modo de prueba' : isAdmin ? 'Operador autorizado' : 'Inicia sesión para registrar aportes';
   const accessChanged = canOperate !== (mode === 'demo' || isAdmin);
   canOperate = mode === 'demo' || isAdmin;
+  $('#open-user-registration').hidden = !isOwner;
+  if (!isOwner && $('#user-dialog').open) $('#user-dialog').close();
   $('#login-panel').hidden = canOperate;
   $('#settings-controls').hidden = !canOperate;
   $('#settings-controls').inert = !canOperate;
