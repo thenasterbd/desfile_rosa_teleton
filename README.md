@@ -27,6 +27,8 @@ El proyecto público de Supabase ya está configurado en `js/supabase-config.js`
 
 En GitHub → **Settings → Pages**, selecciona **GitHub Actions** como origen. El workflow `.github/workflows/pages.yml` publica los archivos web y el SQL público cuando hay un push a `main`; también puedes ejecutarlo manualmente desde Actions. Comprueba que tu plan admite Pages si el repositorio es privado.
 
+La publicación ejecuta `node scripts/build-site.mjs` (Node 20 o superior, sin instalar paquetes). El script crea `_site/` y añade la misma versión de contenido a la entrada y a todas las importaciones locales de JavaScript. Esto evita combinar HTML nuevo con módulos anteriores de la caché, incluidos archivos que todavía hacen referencia a elementos retirados. Los archivos originales del repositorio no se modifican. Puedes servir el resultado con `python -m http.server 4174 --directory _site` para probar la publicación localmente.
+
 El despliegue de GitHub no ejecuta el SQL de Supabase. La instalación de la base de datos y la creación del operador se hacen en el panel de Supabase. GitHub aloja la web HTTPS; Supabase mantiene la base de datos y la conexión en vivo. No se necesita Vercel.
 
 ## Desarrollo y demo

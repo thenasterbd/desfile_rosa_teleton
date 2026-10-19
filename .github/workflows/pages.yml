@@ -19,10 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Preparar archivos públicos
-        run: |
-          mkdir -p _site
-          cp index.html _site/
-          cp -r css js supabase assets _site/
+        run: node scripts/build-site.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
