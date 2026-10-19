@@ -45,7 +45,24 @@ $('#goal-form').addEventListener('submit', async e => { e.preventDefault(); cons
 $('#reset').addEventListener('click', () => { $('#reset-form').reset(); feedback('#reset-feedback', ''); $('#reset-dialog').showModal(); });
 $('#cancel-reset').addEventListener('click', () => $('#reset-dialog').close());
 $('#reset-form').addEventListener('submit', async e => { e.preventDefault(); if ($('#reset-confirm').value !== 'REINICIAR') return; const button = e.target.querySelector('[type=submit]'); button.disabled = true; try { await resetEvent(); $('#reset-dialog').close(); toast('Nuevo evento iniciado. El contador está en cero.'); } catch (error) { feedback('#reset-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
+let hasEventData = false;
+const connectionDelay = setTimeout(() => {
+  if (!hasEventData && /Iniciando|Conectando/.test($('#database-status').textContent)) {
+    $('#database-status').textContent = 'La conexión está tardando más de lo habitual. Comprueba la red o vuelve a conectar.';
+  }
+}, 15000);
+$('#retry-connection').addEventListener('click', () => location.reload());
+$('#empty-start').addEventListener('click', () => $('#amount').focus());
 subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
+  if (ready) { hasEventData = true; clearTimeout(connectionDelay); }
+  document.body.classList.toggle('pending-data', !hasEventData);
+  $('.live-layout').setAttribute('aria-busy', String(!hasEventData));
+  for (const id of ['#total', '#goal', '#remaining', '#count', '#percent']) {
+    $(id).setAttribute('aria-hidden', String(!hasEventData));
+  }
+  $('#connection-notice').hidden = ready;
+  $('#retry-connection').hidden = ready;
+  $('#first-donation').hidden = state.count > 0;
   $('#connection').textContent = connection;
   $('#database-status').textContent = connection;
   $('#database-status').hidden = ready;

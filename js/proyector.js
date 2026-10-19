@@ -5,6 +5,7 @@ export function setupProjector(chime) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   function animate(target) {
     cancelAnimationFrame(animation);
+    $('#total').classList.toggle('long-total', money(target).length > 13);
     const from = shown, start = performance.now(), duration = reduced.matches ? 0 : 1200;
     function frame(now) {
       const t = duration ? Math.min(1, (now - start) / duration) : 1;
@@ -20,14 +21,16 @@ export function setupProjector(chime) {
     if (!previous || s.totalCents !== previous.totalCents) animate(s.totalCents);
     const percentage = s.goalCents > 0 ? s.totalCents / s.goalCents * 100 : 0;
     $('#percent').textContent = new Intl.NumberFormat('es', { maximumFractionDigits: 1 }).format(percentage) + '%';
-    $('#progress-fill').style.width = Math.min(100, percentage) + '%';
+    $('#progress-fill').style.transform = `scaleX(${Math.min(100, percentage) / 100})`;
     $('#progress').setAttribute('aria-valuenow', String(Math.min(100, percentage)));
     $('#progress').setAttribute('aria-valuetext', `${percentage.toFixed(1)}% de la meta`);
     $('#goal').textContent = money(s.goalCents); $('#remaining').textContent = money(Math.max(0, s.goalCents - s.totalCents)); $('#count').textContent = s.count.toLocaleString('es');
     const d = s.last;
-    $('#last-name').textContent = d?.name || 'Tu nombre puede estar aquí';
+    $('.latest-caption').textContent = d ? 'Gracias de corazón a' : 'La primera historia está por comenzar';
+    $('#last-name').textContent = d?.name || 'Tu aporte puede abrir el camino.';
+    $('#last-amount').hidden = !d;
     $('#last-amount').textContent = money(d?.amountCents || 0);
-    $('#last-message').textContent = d?.message || (d ? 'Gracias por ser parte de este gran cambio.' : 'El próximo gran cambio comienza con un pequeño gesto.');
+    $('#last-message').textContent = d?.message || (d ? 'Gracias por ser parte de este gran cambio.' : 'Cada gesto cuenta. El primer aporte marca el comienzo de esta causa.');
     $('#donor-avatar').textContent = d ? d.name.split(/\s+/).slice(0, 2).map(n => n[0]).join('').toUpperCase() : '♡';
     $('#last-time').textContent = d ? 'Un nuevo gesto de solidaridad' : 'Esperando el primer aporte';
     const sameEvent = previous && previous.generation === s.generation;

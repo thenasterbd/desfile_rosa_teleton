@@ -53,9 +53,9 @@ Abre la web mediante HTTP, nunca como archivo local. Las rutas de vistas son `#p
 
 El sonido es una preferencia local. Actívalo con un clic en ajustes para autorizar Web Audio. La primera carga no celebra aportes históricos; las siguientes actualizaciones generan glow, sonido y confetti al cruzar la meta. El modo de movimiento reducido omite confetti y animaciones. La pantalla completa requiere un gesto del usuario.
 
-El diseño usa una composición editorial de campaña: fondo rosa claro, título de gran formato, contador abierto y un bloque magenta para el último aporte. El logo de Rotaract Valle de Santiago está en `assets/rotaract-valle-de-santiago.png`. La tipografía del título, Bebas Neue, se sirve localmente desde `assets/fonts/` con licencia OFL incluida.
+La identidad visual aplica las pautas de rediseño de OpenDesign, documentadas en [`DESIGN.md`](DESIGN.md). Se mantiene el fondo rosa claro y el logo de Rotaract Valle de Santiago en `assets/rotaract-valle-de-santiago.png`. La fuente secundaria Quicksand Book se sirve localmente desde `assets/fonts/Quicksand.ttf`, con licencia OFL incluida. CocogooseProTrial está configurada mediante `local()` para equipos que ya la tengan instalada; falta incorporar su archivo de fuente para que se vea igual en todos los dispositivos. En los demás se usa Quicksand como respaldo.
 
-La aplicación importa Supabase JS 2.118.0 y canvas-confetti 1.9.3 desde cdn.jsdelivr.net, Tailwind 3.4.17 desde cdn.tailwindcss.com y fuentes de Google Fonts. El CSS propio cubre la interfaz si Tailwind o las fuentes no cargan. Permite el dominio de tu proyecto Supabase y WebSocket HTTPS/WSS en la red de los dispositivos. Tailwind CDN se conserva por el requisito original; para tráfico elevado conviene compilarlo como recurso estático en un trabajo posterior.
+La aplicación importa Supabase JS 2.118.0 y canvas-confetti 1.9.3 desde cdn.jsdelivr.net, Tailwind 3.4.17 desde cdn.tailwindcss.com y no necesita fuentes externas en tiempo de ejecución. El CSS propio cubre la interfaz si Tailwind o las fuentes no cargan. Permite el dominio de tu proyecto Supabase y WebSocket HTTPS/WSS en la red de los dispositivos. Tailwind CDN se conserva por el requisito original; para tráfico elevado conviene compilarlo como recurso estático en un trabajo posterior.
 
 ## Verificación antes del evento
 

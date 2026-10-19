@@ -9,12 +9,18 @@ export function setupOperator() {
     const data = { amount: amount.value, name: form.elements.donor.value, message: form.elements.message.value };
     const payload = JSON.stringify(data);
     if (payload !== pendingPayload) { pendingId = crypto.randomUUID(); pendingPayload = payload; }
-    busy = true; button.disabled = true; button.textContent = 'Registrando…'; feedback.textContent = ''; feedback.classList.remove('error');
+    busy = true;
+    form.querySelectorAll('input, textarea').forEach(el => { el.readOnly = true; });
+    form.querySelectorAll('[data-add]').forEach(el => { el.disabled = true; });
+    button.disabled = true; button.textContent = 'Registrando…'; feedback.textContent = ''; feedback.classList.remove('error');
     try {
       await addDonation(data, pendingId);
       form.reset(); pendingId = pendingPayload = null; feedback.textContent = '¡Aporte registrado! Gracias por sumar.'; amount.focus();
     } catch (error) { feedback.textContent = errorMessage(error); feedback.classList.add('error'); }
-    finally { busy = false; button.disabled = false; button.textContent = '♡ Registrar donación'; }
+    finally {
+      form.querySelectorAll('input, textarea').forEach(el => { el.readOnly = false; });
+      form.querySelectorAll('[data-add]').forEach(el => { el.disabled = false; });
+      busy = false; button.disabled = false; button.textContent = '♡ Registrar donación'; }
   });
   let lastHistory = '';
   subscribe(({ history }) => {
