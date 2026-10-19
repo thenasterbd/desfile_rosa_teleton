@@ -23,6 +23,8 @@ El proyecto público de Supabase ya está configurado en `js/supabase-config.js`
 4. Abre la web → **Meta y ajustes**, inicia sesión con esa cuenta y guarda la meta. Los visitantes pueden abrir el proyector sin iniciar sesión.
 5. Para revocar un operador elimina su fila en `operators`. La base de datos rechaza inmediatamente las próximas escrituras aunque una pantalla aún muestre una sesión abierta. La app no incluye registro público; puedes desactivar nuevos registros en Authentication si no los necesitas.
 
+Sin sesión autorizada, **Meta y ajustes** muestra únicamente el formulario de ingreso. **Panel operador** aparece en gris y lleva al formulario, incluso desde un enlace directo. Tras iniciar sesión se habilitan el panel, la meta y el reinicio. Puedes cerrar sesión desde el menú junto a **Meta y ajustes** o al pie de **Meta global**. El modo de prueba conserva los controles locales sin requerir una cuenta.
+
 ## 3. Publicar con GitHub Pages
 
 En GitHub → **Settings → Pages**, selecciona **GitHub Actions** como origen. El workflow `.github/workflows/pages.yml` publica los archivos web y el SQL público cuando hay un push a `main`; también puedes ejecutarlo manualmente desde Actions. Comprueba que tu plan admite Pages si el repositorio es privado.

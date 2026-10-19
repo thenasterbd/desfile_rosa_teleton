@@ -16,12 +16,22 @@ export function chime() {
     osc.start(now + index * .12); osc.stop(now + index * .12 + 1.2);
   });
 }
+let canOperate = false, requestedOperator = false;
 function navigate() {
-  const view = ['proyector', 'operador', 'ajustes'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'proyector';
+  let view = ['proyector', 'operador', 'ajustes'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'proyector';
+  if (view === 'operador' && !canOperate) {
+    requestedOperator = true; location.replace('#ajustes'); view = 'ajustes';
+  }
+  $('#account-menu').open = false;
   document.querySelectorAll('.view').forEach(el => { el.hidden = el.id !== view; });
   document.querySelectorAll('[data-view]').forEach(el => { const active = el.dataset.view === view; el.classList.toggle('active', active); if (active) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
 }
 addEventListener('hashchange', navigate); navigate();
+addEventListener('click', e => { if (!e.target.closest('#account-menu')) $('#account-menu').open = false; });
+addEventListener('keydown', e => { if (e.key === 'Escape' && $('#account-menu').open) { $('#account-menu').open = false; $('#account-menu summary').focus(); } });
+$('[data-view="operador"]').addEventListener('click', () => {
+  if (!canOperate) { requestedOperator = true; setTimeout(() => $('#email').focus(), 0); }
+});
 let toastTimer;
 export function toast(message) { $('#toast').textContent = message; $('#toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4500); }
 function feedback(id, message, error = false) { $(id).textContent = message; $(id).classList.toggle('error', error); }
@@ -39,8 +49,13 @@ async function activateAudio() {
 addEventListener('pointerdown', activateAudio);
 addEventListener('keydown', activateAudio);
 $('#sound').addEventListener('change', async e => { sound = e.target.checked; localStorage.setItem('rosa-sound', String(sound)); if (sound) { await activateAudio(); chime(); } else $('#sound-status').textContent = 'Sonido desactivado'; });
-$('#login-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('[type=submit]'); button.disabled = true; try { await login($('#email').value.trim(), $('#password').value); $('#password').value = ''; feedback('#login-feedback', 'Sesión de operador iniciada.'); } catch (error) { feedback('#login-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
-$('#logout').addEventListener('click', async () => { try { await logout(); $('#password').value = ''; feedback('#login-feedback', 'Sesión cerrada.'); } catch (error) { feedback('#login-feedback', errorMessage(error), true); } });
+$('#login-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('[type=submit]'); button.disabled = true; try { await login($('#email').value.trim(), $('#password').value); $('#password').value = ''; feedback('#login-feedback', ''); if (requestedOperator) { requestedOperator = false; location.hash = 'operador'; } else $('#goal-input').focus(); } catch (error) { feedback('#login-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
+document.querySelectorAll('[data-logout]').forEach(button => button.addEventListener('click', async () => {
+  document.querySelectorAll('[data-logout]').forEach(el => { el.disabled = true; });
+  try { await logout(); $('#password').value = ''; feedback('#login-feedback', 'Sesión cerrada.'); location.hash = 'ajustes'; $('#email').focus(); }
+  catch (error) { $('#account-menu').open = false; toast(errorMessage(error)); }
+  finally { document.querySelectorAll('[data-logout]').forEach(el => { el.disabled = false; }); }
+}));
 $('#goal-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('button'); button.disabled = true; try { await setGoal($('#goal-input').value); feedback('#goal-feedback', 'Meta guardada.'); } catch (error) { feedback('#goal-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 $('#reset').addEventListener('click', () => { $('#reset-form').reset(); feedback('#reset-feedback', ''); $('#reset-dialog').showModal(); });
 $('#cancel-reset').addEventListener('click', () => $('#reset-dialog').close());
@@ -69,7 +84,22 @@ subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
   $('.header-status').dataset.state = ready ? 'ready' : 'error';
   $('#footer-mode').textContent = mode === 'demo' ? 'MODO DE PRUEBA · USD' : 'DESFILE ROSA 2026 · USD';
   $('#operator-mode').textContent = mode === 'demo' ? 'Modo de prueba' : isAdmin ? 'Operador autorizado' : 'Inicia sesión para registrar aportes';
-  $('#logout').hidden = !user;
+  const accessChanged = canOperate !== (mode === 'demo' || isAdmin);
+  canOperate = mode === 'demo' || isAdmin;
+  $('#login-panel').hidden = canOperate;
+  $('#settings-controls').hidden = !canOperate;
+  $('#settings-controls').inert = !canOperate;
+  $('#operador').inert = !canOperate;
+  $('#account-menu').hidden = !user || !isAdmin;
+  document.querySelectorAll('[data-logout]').forEach(el => { el.hidden = !user; });
+  const operatorLink = $('[data-view="operador"]');
+  operatorLink.classList.toggle('requires-login', !canOperate);
+  operatorLink.setAttribute('aria-label', canOperate ? 'Panel operador' : 'Panel operador: inicia sesión para acceder');
+  operatorLink.title = canOperate ? 'Panel operador' : 'Inicia sesión para acceder';
+  $('#settings-title').innerHTML = canOperate ? 'Una meta <span>que nos mueve.</span>' : 'Bienvenido <span>al equipo.</span>';
+  $('#settings-description').textContent = canOperate ? 'Prepara la meta y el sonido de tu evento.' : 'Inicia sesión para continuar.';
+  if (!canOperate && $('#reset-dialog').open) $('#reset-dialog').close();
+  if (accessChanged) navigate();
   if (document.activeElement !== $('#goal-input')) $('#goal-input').value = state.goalCents / 100;
 });
 setupOperator(); setupProjector(chime); initialize();
