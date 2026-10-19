@@ -35,7 +35,6 @@ export function setupProjector(chime) {
     $('#last-amount').hidden = !d;
     $('#last-amount').textContent = money(d?.amountCents || 0);
     $('#last-message').textContent = d?.message || (d ? 'Gracias por ser parte de este gran cambio.' : 'Cada gesto cuenta. El primer aporte marca el comienzo de esta causa.');
-    $('#donor-avatar').textContent = d ? d.name.split(/\s+/).slice(0, 2).map(n => n[0]).join('').toUpperCase() : '♡';
     $('#last-time').textContent = d ? 'Un nuevo gesto de solidaridad' : 'Esperando el primer aporte';
     const sameEvent = previous && previous.generation === s.generation;
     if (previous && !sameEvent) butterflies.clear();

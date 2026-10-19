@@ -1,5 +1,5 @@
 const butterflyURL = new URL('../assets/butterfly.svg', import.meta.url).href;
-const MAX_BUTTERFLIES = 24;
+const MAX_BUTTERFLIES = 160;
 
 // Decoration only: no input handling, data writes or external dependencies.
 export function setupButterflies() {
@@ -25,13 +25,14 @@ export function setupButterflies() {
   function play() {
     if (reduced.matches || document.hidden || typeof layer.animate !== 'function') return;
     const width = innerWidth, height = innerHeight;
-    const count = width < 700 ? 5 : 8;
+    const count = width < 700 ? 40 : 72;
+    const limit = width < 700 ? 80 : MAX_BUTTERFLIES;
     const baseSize = Math.max(42, Math.min(100, width * .045));
 
     for (let i = 0; i < count; i++) {
       // A busy event must not accumulate an unbounded number of effects.
-      if (active.size >= MAX_BUTTERFLIES) remove(active.keys().next().value);
-      const size = baseSize * (.75 + Math.random() * .5);
+      if (active.size >= limit) remove(active.keys().next().value);
+      const size = baseSize * (.8 + Math.random() * .65);
       const particle = document.createElement('div');
       particle.className = 'donation-butterfly';
       particle.style.setProperty('--butterfly-size', `${size}px`);
@@ -42,9 +43,13 @@ export function setupButterflies() {
       particle.append(image);
       layer.append(particle);
 
-      const start = { x: width + size, y: height + size * .5 + Math.random() * 30 };
-      const control1 = { x: width * (.65 + Math.random() * .25), y: height * (.45 + Math.random() * .25) };
-      const control2 = { x: width * (.1 + Math.random() * .25), y: height * (.08 + Math.random() * .25) };
+      // Fan out across the whole viewport, retaining the bottom-right origin.
+      const lane = (i + Math.random()) / count;
+      const start = i % 2
+        ? { x: width + size, y: height * (.8 + Math.random() * .2) }
+        : { x: width * (.8 + Math.random() * .2), y: height + size };
+      const control1 = { x: width * (.1 + lane * .98), y: height * (1.1 - lane * .98) };
+      const control2 = { x: width * (-.06 + lane * .8), y: height * (.75 - lane * .8) };
       const end = { x: -size * 2, y: -size * 2 };
       const phase = Math.random() * Math.PI * 2;
       const frames = [];
@@ -61,8 +66,8 @@ export function setupButterflies() {
         });
       }
       const flight = particle.animate(frames, {
-        duration: 4800 + Math.random() * 1400,
-        delay: i * 130 + Math.random() * 180,
+        duration: 5400 + Math.random() * 2600,
+        delay: (i % 8) * 110 + Math.random() * 400,
         easing: 'linear',
         fill: 'both'
       });

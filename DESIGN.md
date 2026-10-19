@@ -64,7 +64,7 @@ Sin aportes, el último aporte no presenta un monto ficticio de $0; ofrece un es
 vacío y acceso al operador. Con datos, muestra nombre, monto y mensaje reales.
 El demo está identificado y sus datos no se envían a Supabase.
 
-Los nuevos aportes disparan un vuelo de mariposas de `assets/butterfly.svg`, gestionado por `js/mariposas.js`. Las trayectorias van de abajo a la derecha hacia arriba a la izquierda, duran unos 5–7 segundos y no interceptan clics. Se permiten como máximo 24 mariposas simultáneas y se limpian al terminar, al ocultar la pestaña o al reiniciar el evento. El primer snapshot y los cambios de meta no disparan el vuelo.
+Los nuevos aportes disparan un vuelo de mariposas de `assets/butterfly.svg`, gestionado por `js/mariposas.js`. Las trayectorias van de abajo a la derecha hacia arriba a la izquierda, duran unos 6–9 segundos y no interceptan clics. Cada aporte genera 72 mariposas en escritorio o 40 en móvil, distribuidas en un abanico de trayectorias para cubrir la pantalla. Se permiten como máximo 160 mariposas simultáneas en escritorio y 80 en móvil y se limpian al terminar, al ocultar la pestaña o al reiniciar el evento. El primer snapshot y los cambios de meta no disparan el vuelo.
 
 La animación de progreso y los vuelos usan transform; los movimientos respetan
 `prefers-reduced-motion`. Las preferencias de sonido se mantienen por dispositivo.
@@ -82,7 +82,7 @@ consultadas en el commit `4f69a426689bbd471c8f0774c13378e651ae7de8`:
 
 Se usan como criterio de diseño, con código propio para esta SPA. No se ejecuta
 el workspace de OpenDesign ni se agregan sus servicios como dependencia de la web.
-El brief del propietario prevalece: rosa de marca y tipografías solicitadas. El logo del evento está en `assets/desfile-rosa-2026.png` y se muestra con fondo transparente en el encabezado, pie de página y proyector, conservando el logo de Rotaract como organizador.
+El brief del propietario prevalece: rosa de marca y tipografías solicitadas. El favicon y el icono para guardar en dispositivos móviles usan el logo cuadrado de `assets/favicon-2026.png`. El logo del evento está en `assets/desfile-rosa-2026.png` y se muestra con fondo transparente en el encabezado, pie de página y proyector, conservando el logo de Rotaract como organizador.
 
 ## Validación
 
