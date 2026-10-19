@@ -88,6 +88,25 @@ export async function addDonation(data, id) {
   });
   return mutation('register_donation', { p_id: id, p_event_id: state.generation, p_amount_cents: donation.amountCents, p_donor_name: donation.name, p_message: donation.message });
 }
+export async function editDonation(original, data, eventId) {
+  writable();
+  const desired = { amountCents: cents(data.amount), name: data.name.trim().slice(0, 80) || 'Anónimo', message: data.message.trim().slice(0, 240) };
+  const expected = { amountCents: original.amountCents, name: original.name, message: original.message };
+  if (mode === 'demo') return localChange(() => {
+    if (state.generation !== eventId) throw new Error('El evento cambió. Vuelve a abrir el aporte.');
+    const item = history.find(d => d.id === original.id);
+    if (!item) throw new Error('El aporte ya no está disponible.');
+    const current = { amountCents: item.amountCents, name: item.name, message: item.message };
+    if (JSON.stringify(current) === JSON.stringify(desired)) return;
+    if (JSON.stringify(current) !== JSON.stringify(expected)) throw new Error('Otro operador modificó este aporte. Ciérralo y vuelve a abrirlo para ver los cambios.');
+    const totalCents = state.totalCents + desired.amountCents - item.amountCents;
+    if (!Number.isSafeInteger(totalCents) || totalCents < 0) throw new Error('El total supera el límite admitido.');
+    const updated = { ...item, ...desired };
+    history = history.map(d => d.id === item.id ? updated : d);
+    state = { ...state, totalCents, last: state.last?.id === item.id ? updated : state.last };
+  });
+  return mutation('edit_donation', { p_id: original.id, p_event_id: eventId, p_amount_cents: desired.amountCents, p_donor_name: desired.name, p_message: desired.message, p_expected: expected });
+}
 export async function setGoal(value) {
   writable(); const goalCents = cents(value);
   if (mode === 'demo') return localChange(() => { state = { ...state, goalCents }; });

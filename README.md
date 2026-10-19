@@ -64,3 +64,10 @@ La aplicación importa Supabase JS 2.118.0 y canvas-confetti 1.9.3 desde cdn.jsd
 ## Verificación antes del evento
 
 Tras ejecutar el SQL y crear el operador, abre dos dispositivos con el mismo proyecto, registra un aporte real de prueba y comprueba total, historial, meta y reinicio. Prueba también rechazo de escrituras sin sesión y con una cuenta no autorizada, desconexión/reconexión y acceso público del proyector. Las pruebas locales no demuestran que el SQL ya esté instalado en tu proyecto.
+
+
+### Editar aportes recientes
+
+En **Panel operador**, pulsa **Editar** junto al aporte para corregir monto, nombre o mensaje. La fecha y la cantidad de aportes se conservan; el total y el último aporte se actualizan en todas las pantallas. Si otro operador lo modificó, vuelve a abrir el formulario antes de guardar.
+
+Para una base de datos ya instalada, ejecuta `supabase/migrations/20261019_edit_donation.sql` en **Supabase → SQL Editor**. No borra datos. Las instalaciones nuevas pueden ejecutar directamente `supabase/schema.sql`, que ya incluye la función de edición. La edición requiere un operador autorizado y solo admite aportes del evento actual.
