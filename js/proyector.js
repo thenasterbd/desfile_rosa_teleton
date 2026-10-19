@@ -38,7 +38,7 @@ export function setupProjector(chime) {
       const card = $('.total-card'); card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow'); chime();
     }
     if (sameEvent && previous.totalCents < previous.goalCents && s.totalCents >= s.goalCents && !reduced.matches && typeof window.confetti === 'function') {
-      window.confetti({ particleCount: 160, spread: 90, origin: { y: .65 }, colors: ['#e4c0d6', '#e0014d', '#ffffff'], disableForReducedMotion: true });
+      window.confetti({ particleCount: 160, spread: 90, origin: { y: .65 }, colors: ['#FC568D', '#E02D69', '#F93873', '#FFFFFF'], disableForReducedMotion: true });
     }
     previous = { ...s };
   });

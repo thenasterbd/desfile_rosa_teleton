@@ -8,7 +8,15 @@ La vista de operador prioriza velocidad, legibilidad y confirmación de escritur
 La proyección y los formularios usan la misma identidad, con densidades diferentes.
 
 Se mantiene el fondo rosa claro elegido por el propietario, el logo de Rotaract
-Valle de Santiago y los colores de marca `#e4c0d6` y `#e0014d`.
+Valle de Santiago y la paleta proporcionada más recientemente por el propietario:
+`#FC568D`, `#E02D69`, `#F93873` y `#FFFFFF`.
+
+El blanco se usa en superficies, `#E02D69` en progreso e identidad, `#FC568D`
+en detalles y foco suave, y `#F93873` en celebraciones y efectos. El fondo rosa
+claro (`#FFF1F6`) y la superficie de recaudación (`#FFE2ED`) derivan de esta
+paleta. Los textos usan una tinta ciruela para mantener el contraste. Los botones
+con texto blanco usan `#D32660`, un derivado ligeramente más oscuro, para que las
+etiquetas pequeñas alcancen contraste 4.5:1.
 
 ## Tipografías solicitadas
 
@@ -81,6 +89,6 @@ reducido, carga pendiente, error y recuperación, historial vacío y poblado, no
 largos y montos altos. Pruebas funcionales con el demo y respuestas REST controladas;
 no se insertan aportes para estas pruebas en el proyecto real.
 
-Contrastes calculados: texto secundario sobre fondo 5.24:1, texto secundario sobre
-la superficie rosa 4.56:1, texto principal sobre rosa 11.59:1, texto del botón sobre
-el color de acción 4.66:1 y borde de los controles sobre superficie 3.26:1.
+Contrastes calculados: texto secundario sobre fondo 5.99:1, texto secundario sobre
+la superficie rosa 5.43:1 y texto principal sobre rosa 9.72:1. El contraste del
+botón y de los bordes de control se verifica contra los mínimos de 4.5:1 y 3:1.

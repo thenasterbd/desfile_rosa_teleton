@@ -3,23 +3,25 @@
 @import url('../assets/fonts/cocogoose/cocogoose.css');
 @font-face { font-family: 'Quicksand Book'; src: url('../assets/fonts/Quicksand.ttf') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap; }
 :root {
-  --bg: #fcf5f8;
-  --surface: #fffafd;
-  --surface-tint: #f3e3ec;
-  --surface-muted: #ecd4e1;
-  --accent: #e4c0d6;
-  --action: #e0014d;
-  --action-hover: #b80040;
-  --action-soft: #fce5ee;
-  --fg: #39242f;
-  --muted: #78616e;
-  --border: #dfcbd6;
-  --control-border: #a58296;
-  --on-action: #fff7fb;
-  --danger: #a4243f;
-  --warning-surface: #fff3e4;
-  --warning-text: #744114;
-  --focus: #9f1646;
+  --bg: #fff1f6;
+  --surface: #ffffff;
+  --surface-tint: #ffe2ed;
+  --surface-muted: #f5bed2;
+  --accent: #fc568d;
+  --action: #e02d69;
+  --highlight: #f93873;
+  --action-solid: #d32660;
+  --action-hover: #bc1c50;
+  --action-soft: #ffe7ef;
+  --fg: #5b263b;
+  --muted: #755461;
+  --border: #edc3d3;
+  --control-border: #a67b8c;
+  --on-action: #ffffff;
+  --danger: #aa2549;
+  --warning-surface: #ffe7ef;
+  --warning-text: #7f2547;
+  --focus: #ad1c4c;
   --font-display: 'CocogooseProTrial', 'Quicksand Book', 'Arial Rounded MT Bold', sans-serif;
   --font-body: 'Quicksand Book', 'Segoe UI', sans-serif;
   --space-unit: 8px;
@@ -92,7 +94,7 @@ h3 { font: 600 15px/1.5 var(--font-body); margin: 16px 0 8px; }
 .button:disabled { opacity: .55; cursor: wait; transform: none; }
 .ghost { border-color: var(--control-border); color: var(--fg); background: transparent; }
 .ghost:hover { background: var(--surface-tint); border-color: var(--fg); }
-.primary { background: var(--action); color: var(--on-action); }
+.primary { background: var(--action-solid); color: var(--on-action); }
 .primary:hover { background: var(--action-hover); }
 .text-button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; background: none; color: var(--fg); border: 0; padding: 8px 0; font-size: 12px; font-weight: 600; text-decoration: underline; text-underline-offset: 5px; text-decoration-color: var(--control-border); }
 .text-button:hover { text-decoration-color: currentColor; }
@@ -186,11 +188,11 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
 .connection-actions .button { margin-top: 0; }
 .setup-help a { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
 #account-status { overflow-wrap: anywhere; }
-dialog { width: 90%; max-width: 480px; padding: 32px; border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); color: var(--fg); box-shadow: 0 20px 90px #39242f22; }
-dialog::backdrop { background: #39242f66; backdrop-filter: blur(5px); }
+dialog { width: 90%; max-width: 480px; padding: 32px; border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); color: var(--fg); box-shadow: 0 20px 90px #5b263b22; }
+dialog::backdrop { background: #5b263b66; backdrop-filter: blur(5px); }
 dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-.toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); max-width: 90vw; z-index: 20; background: var(--fg); color: var(--surface); border-radius: var(--radius-control); padding: 14px 24px; font-size: 13px; box-shadow: 0 8px 30px #39242f18; }
+.toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); max-width: 90vw; z-index: 20; background: var(--fg); color: var(--surface); border-radius: var(--radius-control); padding: 14px 24px; font-size: 13px; box-shadow: 0 8px 30px #5b263b18; }
 /* No initial zero is presented as a confirmed live result. */
 .pending-data #total { visibility: hidden; }
 .pending-data .total-content::after { content: '—'; position: absolute; left: 0; top: 56px; color: var(--muted); font-size: 90px; line-height: 1; }
@@ -199,7 +201,7 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 .pending-data .latest-card::after { content: 'Esperando datos del evento'; color: var(--muted); font-size: 13px; margin-top: 20px; }
 .glow { animation: glow 1s var(--motion); }
 .view { animation: arrive .3s var(--motion); }
-@keyframes glow { 45% { box-shadow: 0 0 0 3px var(--accent), 0 10px 35px #e0014d14; } }
+@keyframes glow { 45% { box-shadow: 0 0 0 3px var(--accent), 0 10px 35px #f938731a; } }
 @keyframes arrive { from { opacity: .5; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 :fullscreen body { overflow: auto; }
 :fullscreen .topbar, :fullscreen footer, :fullscreen .bottom-note, :fullscreen #first-donation { display: none; }
