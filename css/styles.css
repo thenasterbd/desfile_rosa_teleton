@@ -64,7 +64,7 @@ nav a.active { color: var(--fg); background: var(--surface-tint); }
 .status-banner { font-size: 13px; line-height: 1.6; margin: 0; }
 .connection-notice .text-button { color: var(--warning-text); white-space: nowrap; }
 main { max-width: 1600px; padding: 0 5%; margin: auto; }
-.campaign-header { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(200px, 1fr); gap: 48px; align-items: center; padding: 42px 0 26px; border-top: 1px solid var(--border); }
+.campaign-header { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 42px 0 26px; border-top: 1px solid var(--border); }
 .eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 18px; color: var(--muted); font-size: 11px; line-height: 1.5; font-weight: 500; letter-spacing: .08em; }
 .eyebrow-line { display: inline-block; width: 26px; height: 1px; background: currentColor; }
 h1, h2, h3, p { overflow-wrap: anywhere; }
@@ -72,12 +72,15 @@ h1 { font: 400 clamp(36px, 4.2vw, 60px)/1.1 var(--font-display); letter-spacing:
 h1 span { color: var(--action); }
 .campaign-title { font: 600 clamp(54px, 6.1vw, 90px)/1.05 var(--font-display); letter-spacing: -.045em; margin: 0; text-wrap: balance; }
 .campaign-logo { line-height: 0; }
-.event-logo { display: block; width: min(100%, 340px); height: auto; }
+.event-logo { display: block; width: min(100%, 450px); height: auto; }
 .campaign-title em { color: var(--action); font-weight: inherit; }
-.campaign-caption { max-width: 52ch; font-size: 14px; line-height: 1.7; color: var(--muted); margin: 20px 0 0; }
-.campaign-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.campaign-caption { max-width: 52ch; font-size: 16px; line-height: 1.7; color: var(--muted); margin: 0; }
+.campaign-side { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.campaign-message { font: 400 clamp(26px, 2.65vw, 40px)/1.2 var(--font-display); letter-spacing: -.035em; margin: 0; text-wrap: balance; }
+.campaign-message span { color: var(--action); }
+.organizer-signature { display: flex; align-items: center; gap: 18px; margin-top: 4px; }
 .organizer-label { font-size: 11px; color: var(--muted); }
-.organizer { width: min(100%, 260px); }
+.organizer { width: 160px; max-width: 100%; }
 .organizer-logo { display: block; width: 100%; height: auto; object-fit: contain; }
 .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 32px; margin: 42px 0 30px; }
 .section-heading h1 { margin-bottom: 12px; }
@@ -207,7 +210,7 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 :fullscreen .topbar, :fullscreen footer, :fullscreen .bottom-note, :fullscreen #first-donation { display: none; }
 :fullscreen main { max-width: 1800px; padding-top: 20px; }
 :fullscreen .campaign-header { padding: 12px 0 16px; border: 0; }
-:fullscreen .event-logo { width: 275px; }
+:fullscreen .event-logo { width: 350px; }
 :fullscreen .total-card { padding: 40px 48px; }
 :fullscreen .total { font-size: clamp(80px, 15cqw, 190px); }
 :fullscreen .total.long-total { font-size: clamp(30px, 8cqw, 110px); }
@@ -226,7 +229,7 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   .campaign-header { gap: 24px; padding-top: 30px; }
   .campaign-title { font-size: 7vw; }
   .campaign-caption { font-size: 13px; }
-  .organizer { width: 220px; }
+  .organizer { width: 150px; }
   .live-layout { grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr); gap: 18px; }
   .total-card { padding: 26px; }
   .latest-card { padding: 26px; }
@@ -247,11 +250,12 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   .campaign-header { grid-template-columns: minmax(0, 1fr); padding: 28px 0 22px; gap: 24px; }
   .eyebrow { font-size: 10px; margin-bottom: 14px; }
   .campaign-title { font-size: clamp(44px, 11vw, 72px); }
-  .event-logo { width: min(100%, 300px); }
-  .campaign-caption { font-size: 13px; margin-top: 16px; }
-  .campaign-side { flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; }
+  .event-logo { width: min(100%, 360px); margin-inline: auto; }
+  .campaign-caption { font-size: 14px; margin: 0; }
+  .campaign-message { font-size: clamp(24px, 6.2vw, 32px); }
+  .campaign-side { flex-direction: column; align-items: flex-start; gap: 14px; }
   .organizer-label { font-size: 11px; }
-  .organizer { width: 185px; max-width: 60%; }
+  .organizer { width: 150px; max-width: 100%; }
   .section-heading { flex-direction: column; gap: 16px; align-items: flex-start; margin: 26px 0 22px; }
   h1 { font-size: 37px; }
   h1:not(.campaign-title) span { display: block; }
