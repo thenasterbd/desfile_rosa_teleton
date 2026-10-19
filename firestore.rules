@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function operator() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function validState() {
+      let s = request.resource.data;
+      return s.keys().hasOnly(['totalCents','goalCents','count','generation','last'])
+        && s.totalCents is int && s.totalCents >= 0 && s.totalCents <= 9007199254740991
+        && s.goalCents is int && s.goalCents > 0 && s.goalCents <= 10000000000
+        && s.count is int && s.count >= 0
+        && s.generation is string && s.generation.size() > 0 && s.generation.size() <= 64;
+    }
+    match /meta/event {
+      allow read: if true;
+      allow create, update: if operator() && validState();
+      allow delete: if false;
+    }
+    match /events/{eventId}/donations/{donationId} {
+      allow read: if true;
+      allow create: if operator()
+        && eventId == getAfter(/databases/$(database)/documents/meta/event).data.generation
+        && request.resource.data.keys().hasOnly(['id','amountCents','name','message','createdAt'])
+        && request.resource.data.id == donationId
+        && request.resource.data.amountCents is int
+        && request.resource.data.amountCents > 0 && request.resource.data.amountCents <= 10000000000
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.message is string && request.resource.data.message.size() <= 240
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+    match /admins/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list, write: if false;
+    }
+  }
+}
