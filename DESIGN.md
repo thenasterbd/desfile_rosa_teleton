@@ -80,7 +80,7 @@ consultadas en el commit `4f69a426689bbd471c8f0774c13378e651ae7de8`:
 
 Se usan como criterio de diseño, con código propio para esta SPA. No se ejecuta
 el workspace de OpenDesign ni se agregan sus servicios como dependencia de la web.
-El brief del propietario prevalece: rosa de marca y tipografías solicitadas. El logo del evento está en `assets/desfile-rosa-2026.png` y se muestra con fondo transparente en el proyector, conservando el logo de Rotaract como organizador.
+El brief del propietario prevalece: rosa de marca y tipografías solicitadas. El logo del evento está en `assets/desfile-rosa-2026.png` y se muestra con fondo transparente en el encabezado, pie de página y proyector, conservando el logo de Rotaract como organizador.
 
 ## Validación
 

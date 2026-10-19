@@ -67,10 +67,10 @@ subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
   $('#database-status').textContent = connection;
   $('#database-status').hidden = ready;
   $('.header-status').dataset.state = ready ? 'ready' : 'error';
-  $('#footer-mode').textContent = mode === 'demo' ? 'DEMO LOCAL · USD' : 'SUPABASE · USD';
-  $('#operator-mode').textContent = mode === 'demo' ? 'Demostración · solo este navegador' : isAdmin ? 'Operador autorizado' : 'Lectura · inicia sesión';
+  $('#footer-mode').textContent = mode === 'demo' ? 'MODO DE PRUEBA · USD' : 'DESFILE ROSA 2026 · USD';
+  $('#operator-mode').textContent = mode === 'demo' ? 'Modo de prueba' : isAdmin ? 'Operador autorizado' : 'Inicia sesión para registrar aportes';
   $('#logout').hidden = !user;
-  $('#account-status').textContent = user ? `${isAdmin ? 'Operador autorizado' : 'Cuenta sin autorización'} · ${user.email}` : 'Sin sesión de operador';
+  $('#account-status').textContent = user ? `${isAdmin ? 'Operador autorizado' : 'Cuenta sin acceso al panel'} · ${user.email}` : 'Sin sesión de operador';
   if (document.activeElement !== $('#goal-input')) $('#goal-input').value = state.goalCents / 100;
 });
 setupOperator(); setupProjector(chime); initialize();

@@ -22,30 +22,33 @@ function emit() { for (const fn of listeners) fn({ state, history, mode, connect
 function readLocal() {
   const raw = localStorage.getItem(STATE_KEY);
   const data = raw ? JSON.parse(raw) : { state: initial(), history: [] };
-  if (!data.state || !Array.isArray(data.history)) throw new Error('Los datos locales no son válidos.');
+  if (!data.state || !Array.isArray(data.history)) throw new Error('No se pudieron recuperar los aportes de prueba.');
   state = data.state; history = data.history;
 }
 function localChange(fn) {
-  if (!navigator.locks) return Promise.reject(new Error('Usa Chrome, Edge o Firefox actualizados para la demostración.'));
+  if (!navigator.locks) return Promise.reject(new Error('Abre el modo de prueba en un navegador actualizado.'));
   return navigator.locks.request(STATE_KEY, () => {
     readLocal(); fn(); localStorage.setItem(STATE_KEY, JSON.stringify({ state, history })); emit();
   });
 }
 function writable() {
-  if (!ready) throw new Error('Espera a que los datos estén disponibles. Revisa la conexión y la instalación del SQL.');
+  if (!ready) throw new Error('Espera a que se actualicen los datos del evento. Revisa tu conexión e inténtalo de nuevo.');
   if (mode !== 'demo' && !isAdmin) throw new Error('Inicia sesión con una cuenta de operador autorizada en Meta y ajustes.');
 }
 export function databaseError(error) {
-  if (['PGRST202', 'PGRST205', '42P01', '42883'].includes(error?.code)) return 'Falta instalar la base de datos: ejecuta supabase/schema.sql en SQL Editor.';
-  if (error?.code === '42501') return 'Operador no autorizado. Revisa la tabla operators y las reglas RLS.';
+  if (['PGRST202', 'PGRST205', '42P01', '42883'].includes(error?.code)) return 'El evento todavía no está disponible. Contacta a la organización.';
+  if (error?.code === '42501') return 'Tu cuenta no tiene permiso para realizar esta acción. Contacta a la organización.';
   if (error?.code === '22023') return error.message;
   if (error?.code === '23514') return 'El importe o el total supera los límites admitidos.';
   if (error?.code === 'invalid_credentials') return 'Correo o contraseña incorrectos.';
-  return error?.message || 'No se pudo conectar con Supabase.';
+  if (error?.code === 'email_not_confirmed') return 'Confirma tu correo antes de iniciar sesión.';
+  if (error?.status === 429) return 'Espera unos minutos antes de volver a intentarlo.';
+  return 'No se pudo completar la operación. Revisa tu conexión e inténtalo de nuevo.';
 }
+class EventError extends Error {}
 async function rpc(name, args) {
   const { data, error } = await client.rpc(name, args);
-  if (error) throw new Error(databaseError(error));
+  if (error) throw new EventError(databaseError(error));
   return data;
 }
 let refreshTask, dirty = false;
@@ -58,12 +61,12 @@ async function refresh() {
       dirty = false;
       try {
         const data = await rpc('get_event_snapshot');
-        if (!data?.event) throw new Error('No hay un evento activo. Ejecuta supabase/schema.sql.');
+        if (!data?.event) throw new EventError('No hay un evento activo. Contacta a la organización.');
         const e = data.event;
         state = { totalCents: Number(e.total_cents), goalCents: Number(e.goal_cents), count: e.donation_count, generation: e.id, last: e.last_donation };
         history = data.donations.map(d => ({ id: d.id, amountCents: Number(d.amount_cents), name: d.donor_name, message: d.message, createdAt: d.created_at }));
-        ready = true; connection = realtime ? 'Conectado en vivo' : 'Conectado · sincronización de respaldo';
-      } catch (error) { ready = false; connection = databaseError(error); }
+        ready = true; connection = realtime ? 'Conectado en vivo' : 'Actualizando aportes';
+      } catch (error) { ready = false; connection = error instanceof EventError ? error.message : databaseError(error); }
       emit();
     }
   })();
@@ -107,11 +110,11 @@ async function applySession(session) {
   }
 }
 export async function login(email, password) {
-  if (!client) throw new Error('El acceso de operador requiere Supabase; sal de la demostración.');
+  if (!client) throw new Error('Vuelve al evento para iniciar sesión con tu cuenta.');
   const { data, error } = await client.auth.signInWithPassword({ email, password });
   if (error) throw new Error(databaseError(error));
   const authorized = await applySession(data.session);
-  if (!authorized) throw new Error(`Cuenta sin permiso de operador. Añade su UID a operators: ${data.user.id}`);
+  if (!authorized) throw new Error('Tu cuenta no tiene acceso al panel. Contacta a la organización.');
 }
 export async function logout() {
   if (!client) return;
@@ -122,11 +125,11 @@ export async function logout() {
 export async function initialize() {
   try {
     if (mode === 'demo') {
-      readLocal(); connection = 'Demostración local'; ready = true;
-      addEventListener('storage', e => { if (e.key === STATE_KEY) { try { readLocal(); emit(); } catch { ready = false; connection = 'Error de almacenamiento'; emit(); } } });
+      readLocal(); connection = 'Modo de prueba'; ready = true;
+      addEventListener('storage', e => { if (e.key === STATE_KEY) { try { readLocal(); emit(); } catch { ready = false; connection = 'No se pudieron recuperar los aportes de prueba'; emit(); } } });
       emit(); return;
     }
-    connection = 'Conectando a Supabase…'; emit();
+    connection = 'Conectando al evento…'; emit();
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
     client = createClient(supabaseConfig.url, supabaseConfig.publishableKey);
     // No esperar llamadas Auth dentro del callback: Supabase mantiene un bloqueo interno.
@@ -141,5 +144,5 @@ export async function initialize() {
     addEventListener('online', () => { refresh(); });
     addEventListener('offline', () => { ready = false; connection = 'Sin conexión · no se pueden registrar aportes'; emit(); });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
-  } catch { ready = false; connection = 'No se pudo cargar Supabase. Revisa tu conexión y permite cdn.jsdelivr.net.'; emit(); }
+  } catch { ready = false; connection = 'No se pudo conectar al evento. Revisa tu conexión y vuelve a intentarlo.'; emit(); }
 }
