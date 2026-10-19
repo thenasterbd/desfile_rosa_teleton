@@ -74,7 +74,7 @@ h1 span { color: var(--action); }
 .campaign-title em { color: var(--action); font-weight: inherit; }
 .campaign-caption { max-width: 52ch; font-size: 16px; line-height: 1.7; color: var(--muted); margin: 0; }
 .campaign-side { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
-.campaign-message { font: 400 clamp(26px, 2.65vw, 40px)/1.2 var(--font-display); letter-spacing: -.035em; margin: 0; text-wrap: balance; }
+.campaign-message { font: 400 clamp(32px, 3.5vw, 56px)/1.2 var(--font-display); letter-spacing: -.035em; margin: 0; text-wrap: balance; }
 .campaign-message span { color: var(--action); }
 .organizer-signature { display: flex; align-items: center; gap: 18px; margin-top: 4px; }
 .organizer-label { font-size: 11px; color: var(--muted); }
@@ -145,6 +145,22 @@ h3 { font: 600 15px/1.5 var(--font-body); margin: 16px 0 8px; }
 footer { max-width: 1440px; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 20px 0; margin: 0 5%; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); }
 .footer-brand { display: inline-flex; align-items: center; }
 footer > span:last-child { font-size: 9px; letter-spacing: .08em; }
+/* Projection copy must remain legible across the room. */
+#proyector .eyebrow, #proyector .live-label { color: var(--fg); font-size: clamp(12px, 1vw, 16px); font-weight: 600; }
+#proyector .edition { color: var(--fg); font-size: 12px; font-weight: 500; }
+#proyector .campaign-caption { color: var(--fg); font-size: clamp(16px, 1.4vw, 21px); font-weight: 500; }
+#proyector .organizer-label { color: var(--fg); font-size: 14px; font-weight: 500; }
+#proyector .projector-note { color: var(--fg); font-size: 15px; font-weight: 500; }
+#proyector .overline { color: var(--fg); font-size: 18px; font-weight: 500; }
+#proyector .support-tag { color: var(--fg); font-size: clamp(13px, 1.1vw, 17px); font-weight: 500; }
+#proyector .progress-heading, #proyector .goal-row { color: var(--fg); font-size: clamp(14px, 1.2vw, 18px); font-weight: 500; }
+#proyector .progress-heading strong, #proyector .goal-row strong { font-size: clamp(16px, 1.5vw, 22px); font-weight: 700; }
+#proyector .goal-row > span:first-child { font-size: clamp(16px, 1.5vw, 22px); font-weight: 700; }
+#proyector .latest-caption { color: var(--fg); font-size: 15px; font-weight: 500; }
+#proyector .latest-footer { color: var(--fg); font-size: 13px; font-weight: 500; }
+#proyector .impact-grid p { color: var(--fg); font-size: 14px; font-weight: 500; }
+#proyector .bottom-note { color: var(--fg); font-size: 14px; font-weight: 500; }
+
 /* Workspaces share typography, spacing and interaction tokens with the projection. */
 .operator-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 26px; }
 .panel { padding: 30px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; margin-bottom: 26px; min-width: 0; }
@@ -208,6 +224,10 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 :fullscreen main { max-width: 1800px; padding-top: 20px; }
 :fullscreen .campaign-header { padding: 12px 0 16px; border: 0; }
 :fullscreen .event-logo { width: 350px; }
+:fullscreen .campaign-message { font-size: clamp(38px, 3.3vw, 64px); }
+:fullscreen #proyector .overline, :fullscreen #proyector .progress-heading, :fullscreen #proyector .goal-row { font-size: 22px; }
+:fullscreen #proyector .goal-row > span:first-child, :fullscreen #proyector .goal-row strong, :fullscreen #proyector .progress-heading strong { font-size: 24px; }
+:fullscreen #proyector .support-tag, :fullscreen #proyector .latest-caption, :fullscreen #proyector .latest-footer, :fullscreen #proyector .impact-grid p { font-size: 18px; }
 :fullscreen .total-card { padding: 40px 48px; }
 :fullscreen .total { font-size: clamp(80px, 15cqw, 190px); }
 :fullscreen .total.long-total { font-size: clamp(30px, 8cqw, 110px); }
@@ -218,6 +238,8 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 :fullscreen .latest-card blockquote { font-size: 28px; }
 :fullscreen .overline, :fullscreen .progress-heading, :fullscreen .goal-row { font-size: 17px; }
 :fullscreen .goal-row strong { font-size: 20px; }
+:fullscreen .impact-grid { margin-top: 20px; }
+:fullscreen .impact-grid article { padding-block: 10px; }
 @media (min-width: 1700px) { footer { margin-inline: auto; } }
 @media (max-width: 1120px) {
   .topbar { padding-inline: 4%; gap: 20px; }
@@ -249,7 +271,8 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   .campaign-title { font-size: clamp(44px, 11vw, 72px); }
   .event-logo { width: min(100%, 360px); margin-inline: auto; }
   .campaign-caption { font-size: 14px; margin: 0; }
-  .campaign-message { font-size: clamp(24px, 6.2vw, 32px); }
+  .campaign-message { font-size: clamp(28px, 7vw, 36px); }
+  :fullscreen .campaign-message { font-size: clamp(28px, 7vw, 36px); }
   .campaign-side { flex-direction: column; align-items: flex-start; gap: 14px; }
   .organizer-label { font-size: 11px; }
   .organizer { width: 150px; max-width: 100%; }
