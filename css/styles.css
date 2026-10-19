@@ -219,7 +219,7 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 @keyframes glow { 45% { box-shadow: 0 0 0 3px var(--accent), 0 10px 35px #f938731a; } }
 @keyframes arrive { from { opacity: .5; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 :fullscreen body { overflow: auto; }
-:fullscreen .topbar, :fullscreen footer, :fullscreen .bottom-note, :fullscreen #first-donation { display: none; }
+:fullscreen .topbar, :fullscreen footer, :fullscreen .bottom-note, :fullscreen #first-donation, :fullscreen #fullscreen { display: none; }
 :fullscreen main { max-width: 1800px; padding-top: 20px; }
 :fullscreen .campaign-header { padding: 12px 0 16px; border: 0; }
 :fullscreen .event-logo { width: 350px; }
