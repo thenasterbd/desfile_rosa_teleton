@@ -34,11 +34,21 @@ function navigate() {
 addEventListener('hashchange', navigate); navigate();
 $('[data-view="ajustes"]').setAttribute('aria-controls', 'account-menu');
 $('[data-view="ajustes"]').addEventListener('click', () => {
-  if (location.hash === '#ajustes') setAccountMenu($('#account-menu').hidden);
+  setAccountMenu(true);
 });
+const settingsNav = $('.settings-nav');
+let menuCloseTimer;
+settingsNav.addEventListener('pointerenter', e => {
+  if (e.pointerType === 'mouse') { clearTimeout(menuCloseTimer); setAccountMenu(true); }
+});
+settingsNav.addEventListener('pointerleave', e => {
+  if (e.pointerType === 'mouse') menuCloseTimer = setTimeout(() => setAccountMenu(false), 180);
+});
+settingsNav.addEventListener('focusin', () => { clearTimeout(menuCloseTimer); setAccountMenu(true); });
+settingsNav.addEventListener('focusout', e => { if (!settingsNav.contains(e.relatedTarget)) setAccountMenu(false); });
 addEventListener('click', e => { if (!e.target.closest('.settings-nav')) setAccountMenu(false); });
 addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !$('#account-menu').hidden) { setAccountMenu(false); $('[data-view="ajustes"]').focus(); }
+  if (e.key === 'Escape' && !$('#account-menu').hidden) { $('[data-view="ajustes"]').focus(); setAccountMenu(false); }
 });
 $('[data-view="operador"]').addEventListener('click', () => {
   if (!canOperate) { requestedOperator = true; setTimeout(() => $('#email').focus(), 0); }
@@ -69,6 +79,10 @@ document.querySelectorAll('[data-logout]').forEach(button => button.addEventList
 }));
 $('#goal-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('button'); button.disabled = true; try { await setGoal($('#goal-input').value); feedback('#goal-feedback', 'Meta guardada.'); } catch (error) { feedback('#goal-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 $('#reset').addEventListener('click', () => { $('#reset-form').reset(); feedback('#reset-feedback', ''); $('#reset-dialog').showModal(); });
+document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => {
+  const cancel = $(`#cancel-${button.dataset.close}`);
+  if (!cancel.disabled) cancel.click();
+}));
 $('#cancel-reset').addEventListener('click', () => $('#reset-dialog').close());
 $('#reset-form').addEventListener('submit', async e => { e.preventDefault(); if ($('#reset-confirm').value !== 'REINICIAR') return; const button = e.target.querySelector('[type=submit]'); button.disabled = true; try { await resetEvent(); $('#reset-dialog').close(); toast('Nuevo evento iniciado. El contador está en cero.'); } catch (error) { feedback('#reset-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 let hasEventData = false;
@@ -102,6 +116,7 @@ subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
   $('#settings-controls').inert = !canOperate;
   $('#operador').inert = !canOperate;
   menuAvailable = !!user && isAdmin;
+  $('.settings-chevron').hidden = !menuAvailable;
   if (!menuAvailable) setAccountMenu(false);
   document.querySelectorAll('[data-logout]').forEach(el => { el.hidden = !user; });
   const operatorLink = $('[data-view="operador"]');

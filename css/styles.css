@@ -343,3 +343,28 @@ nav a.requires-login:hover { color: #514b55; background: #e3dfe5; }
 
 .edit-donation { min-height: 44px; white-space: nowrap; }
 #edit-dialog { width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; }
+
+/* Modales con espaciado independiente del reset del CDN. */
+.settings-chevron { width: 14px; height: 14px; flex-shrink: 0; transition: transform .2s ease; }
+[data-view="ajustes"][aria-expanded="true"] .settings-chevron { transform: rotate(180deg); }
+.account-dropdown::before { content: ""; position: absolute; top: -12px; height: 12px; left: 0; right: 0; }
+dialog.event-modal { box-sizing: border-box; width: min(520px, calc(100% - 32px)); max-width: 520px; max-height: calc(100dvh - 40px); margin: auto; padding: 32px; overflow-y: auto; border: 1px solid #f0d5e1; border-radius: 24px; background: #fff; box-shadow: 0 24px 100px #4f193747; }
+dialog.event-modal::backdrop { background: #3f1b3466; backdrop-filter: blur(7px); }
+.event-modal .modal-heading { padding-right: 32px; margin-bottom: 12px; }
+.event-modal .modal-eyebrow { margin: 0 0 10px; color: #b8245b; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.event-modal h2 { margin: 0; font-family: var(--font-display); font-size: 25px; font-weight: 350; line-height: 1.25; color: var(--fg); }
+.event-modal > p { margin: 0 0 24px; font-size: 14px; line-height: 1.65; color: #715363; }
+.event-modal label { margin: 18px 0 8px; font-size: 13px; font-weight: 600; }
+.event-modal input:not([type=checkbox]), .event-modal textarea { box-sizing: border-box; padding: 12px 14px; border: 1px solid #dfbdce; border-radius: 12px; background: #fffbfd; font-size: 15px; line-height: 1.5; }
+.event-modal textarea { min-height: 100px; }
+.event-modal .dialog-actions { margin-top: 26px; padding-top: 20px; border-top: 1px solid #f2dfe8; display: flex; gap: 10px; }
+.event-modal .dialog-actions .button { min-height: 46px; padding: 12px 18px; font-size: 13px; }
+.event-modal .feedback:empty { display: none; }
+.event-modal .modal-close { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border: 1px solid #efdce5; border-radius: 50%; background: #fff4f8; color: #82465e; font: 26px/1 var(--font-body); cursor: pointer; }
+.event-modal .modal-close:hover { background: #fce1ed; }
+@media (max-width: 540px) {
+  dialog.event-modal { padding: 24px 20px; border-radius: 20px; max-height: calc(100dvh - 24px); }
+  .event-modal h2 { font-size: 22px; }
+  .event-modal .dialog-actions { flex-direction: column-reverse; }
+  .event-modal .dialog-actions .button { width: 100%; }
+}
