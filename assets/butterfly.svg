@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 112" fill="none">
+  <style>
+    .left,.right{transform-box:view-box;transform-origin:60px 60px;animation:flap .36s ease-in-out infinite alternate}
+    .right{animation-name:flap-right}
+    @keyframes flap{from{transform:rotateY(0deg)}to{transform:rotateY(62deg)}}
+    @keyframes flap-right{from{transform:rotateY(0deg)}to{transform:rotateY(-62deg)}}
+    @media(prefers-reduced-motion:reduce){.left,.right{animation:none}}
+  </style>
+  <g class="left">
+    <path d="M59 61C45 42 29 4 13 8 0 12 7 46 21 61 6 61 7 83 20 92 35 104 48 77 59 66Z" fill="#FC568D"/>
+    <path d="M55 59C42 43 28 14 18 18 9 22 17 46 28 57 38 65 46 64 55 65Z" fill="#F93873"/>
+    <path d="M51 67C36 63 20 66 18 76 17 90 35 86 51 67Z" fill="#E02D69"/>
+    <path d="M47 55C32 35 24 26 23 31 22 38 36 49 47 55ZM44 71C27 74 24 80 29 79 35 78 40 74 44 71Z" fill="#FFFFFF" fill-opacity=".55"/>
+  </g>
+  <g class="right">
+    <path d="M61 61C75 42 91 4 107 8 120 12 113 46 99 61 114 61 113 83 100 92 85 104 72 77 61 66Z" fill="#FC568D"/>
+    <path d="M65 59C78 43 92 14 102 18 111 22 103 46 92 57 82 65 74 64 65 65Z" fill="#F93873"/>
+    <path d="M69 67C84 63 100 66 102 76 103 90 85 86 69 67Z" fill="#E02D69"/>
+    <path d="M73 55C88 35 96 26 97 31 98 38 84 49 73 55ZM76 71C93 74 96 80 91 79 85 78 80 74 76 71Z" fill="#FFFFFF" fill-opacity=".55"/>
+  </g>
+  <path d="M57 55C56 49 64 49 63 55L62 79C61 84 59 84 58 79Z" fill="#E02D69"/>
+  <path d="M59 53C56 43 52 40 49 42M61 53C64 43 68 40 71 42" stroke="#E02D69" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

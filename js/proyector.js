@@ -1,8 +1,10 @@
 import { subscribe, money } from './supabase-config.js';
+import { setupButterflies } from './mariposas.js';
 export function setupProjector(chime) {
   const $ = selector => document.querySelector(selector);
   let previous, shown = 0, animation;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const butterflies = setupButterflies();
   function animate(target) {
     cancelAnimationFrame(animation);
     $('#total').classList.toggle('long-total', money(target).length > 13);
@@ -17,7 +19,9 @@ export function setupProjector(chime) {
     }
     animation = requestAnimationFrame(frame);
   }
-  subscribe(({ state: s }) => {
+  subscribe(({ state: s, ready }) => {
+    // The first confirmed snapshot establishes a baseline, never a celebration.
+    if (!previous && !ready) return;
     if (!previous || s.totalCents !== previous.totalCents) animate(s.totalCents);
     const percentage = s.goalCents > 0 ? s.totalCents / s.goalCents * 100 : 0;
     $('#percent').textContent = new Intl.NumberFormat('es', { maximumFractionDigits: 1 }).format(percentage) + '%';
@@ -34,8 +38,10 @@ export function setupProjector(chime) {
     $('#donor-avatar').textContent = d ? d.name.split(/\s+/).slice(0, 2).map(n => n[0]).join('').toUpperCase() : '♡';
     $('#last-time').textContent = d ? 'Un nuevo gesto de solidaridad' : 'Esperando el primer aporte';
     const sameEvent = previous && previous.generation === s.generation;
+    if (previous && !sameEvent) butterflies.clear();
     if (sameEvent && d && d.id !== previous.last?.id) {
       const card = $('.total-card'); card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow'); chime();
+      butterflies.play();
     }
     if (sameEvent && previous.totalCents < previous.goalCents && s.totalCents >= s.goalCents && !reduced.matches && typeof window.confetti === 'function') {
       window.confetti({ particleCount: 160, spread: 90, origin: { y: .65 }, colors: ['#FC568D', '#E02D69', '#F93873', '#FFFFFF'], disableForReducedMotion: true });

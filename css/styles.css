@@ -321,6 +321,10 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   :fullscreen .latest-card h2 { font-size: 22px; }
   :fullscreen .latest-card blockquote { font-size: 23px; }
 }
+/* Flight paths are animated with transforms and cannot intercept event controls. */
+.butterfly-layer { position: fixed; inset: 0; z-index: 15; overflow: hidden; pointer-events: none; }
+.donation-butterfly { position: absolute; left: 0; top: 0; width: var(--butterfly-size); height: var(--butterfly-size); pointer-events: none; will-change: transform, opacity; }
+.donation-butterfly img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 5px #e02d6920); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

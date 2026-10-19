@@ -64,7 +64,9 @@ Sin aportes, el último aporte no presenta un monto ficticio de $0; ofrece un es
 vacío y acceso al operador. Con datos, muestra nombre, monto y mensaje reales.
 El demo está identificado y sus datos no se envían a Supabase.
 
-La animación de progreso usa transform; los movimientos respetan
+Los nuevos aportes disparan un vuelo de mariposas de `assets/butterfly.svg`, gestionado por `js/mariposas.js`. Las trayectorias van de abajo a la derecha hacia arriba a la izquierda, duran unos 5–7 segundos y no interceptan clics. Se permiten como máximo 24 mariposas simultáneas y se limpian al terminar, al ocultar la pestaña o al reiniciar el evento. El primer snapshot y los cambios de meta no disparan el vuelo.
+
+La animación de progreso y los vuelos usan transform; los movimientos respetan
 `prefers-reduced-motion`. Las preferencias de sonido se mantienen por dispositivo.
 
 ## Referencias utilizadas
