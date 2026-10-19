@@ -70,7 +70,6 @@ subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
   $('#footer-mode').textContent = mode === 'demo' ? 'MODO DE PRUEBA · USD' : 'DESFILE ROSA 2026 · USD';
   $('#operator-mode').textContent = mode === 'demo' ? 'Modo de prueba' : isAdmin ? 'Operador autorizado' : 'Inicia sesión para registrar aportes';
   $('#logout').hidden = !user;
-  $('#account-status').textContent = user ? `${isAdmin ? 'Operador autorizado' : 'Cuenta sin acceso al panel'} · ${user.email}` : 'Sin sesión de operador';
   if (document.activeElement !== $('#goal-input')) $('#goal-input').value = state.goalCents / 100;
 });
 setupOperator(); setupProjector(chime); initialize();

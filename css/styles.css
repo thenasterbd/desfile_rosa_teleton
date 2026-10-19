@@ -203,7 +203,6 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
 .danger-button:hover { background: var(--surface); }
 .connection-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0; }
 .connection-actions .button { margin-top: 0; }
-#account-status { overflow-wrap: anywhere; }
 dialog { width: 90%; max-width: 480px; padding: 32px; border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); color: var(--fg); box-shadow: 0 20px 90px #5b263b22; }
 dialog::backdrop { background: #5b263b66; backdrop-filter: blur(5px); }
 dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
