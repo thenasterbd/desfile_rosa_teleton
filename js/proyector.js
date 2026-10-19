@@ -1,4 +1,4 @@
-import { subscribe, money } from './firebase-config.js';
+import { subscribe, money } from './supabase-config.js';
 export function setupProjector(chime) {
   const $ = selector => document.querySelector(selector);
   let previous, shown = 0, animation;

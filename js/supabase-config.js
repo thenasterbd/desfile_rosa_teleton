@@ -1,0 +1,145 @@
+// Estos datos identifican la API pública. La seguridad reside en RLS y las RPC.
+// Nunca se debe poner aquí una clave secret/service_role.
+export const supabaseConfig = Object.freeze({
+  url: 'https://ijbyhoiwfpdlgviuoedo.supabase.co',
+  publishableKey: 'sb_publishable_rmzzOmqk0jM7vYqKqzCj8g_L6YoTlru'
+});
+const STATE_KEY = 'desfile-rosa-demo-v1';
+const initial = () => ({ totalCents: 0, goalCents: 10000000, count: 0, generation: 'initial', last: null });
+export const money = value => new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(value / 100);
+export function cents(value) {
+  const text = String(value).trim();
+  if (!/^\d+(\.\d{1,2})?$/.test(text)) throw new Error('Usa un monto positivo con hasta dos decimales.');
+  const amount = Math.round(Number(text) * 100);
+  if (!Number.isSafeInteger(amount) || amount < 1 || amount > 10000000000) throw new Error('El monto debe estar entre $0.01 y $100,000,000.');
+  return amount;
+}
+const listeners = new Set();
+const mode = new URLSearchParams(location.search).get('demo') === '1' ? 'demo' : 'supabase';
+let state = initial(), history = [], connection = 'Iniciando…', ready = false, user = null, isAdmin = false, client, realtime = false, sessionRevision = 0;
+export function subscribe(fn) { listeners.add(fn); fn({ state, history, mode, connection, ready, user, isAdmin }); return () => listeners.delete(fn); }
+function emit() { for (const fn of listeners) fn({ state, history, mode, connection, ready, user, isAdmin }); }
+function readLocal() {
+  const raw = localStorage.getItem(STATE_KEY);
+  const data = raw ? JSON.parse(raw) : { state: initial(), history: [] };
+  if (!data.state || !Array.isArray(data.history)) throw new Error('Los datos locales no son válidos.');
+  state = data.state; history = data.history;
+}
+function localChange(fn) {
+  if (!navigator.locks) return Promise.reject(new Error('Usa Chrome, Edge o Firefox actualizados para la demostración.'));
+  return navigator.locks.request(STATE_KEY, () => {
+    readLocal(); fn(); localStorage.setItem(STATE_KEY, JSON.stringify({ state, history })); emit();
+  });
+}
+function writable() {
+  if (!ready) throw new Error('Espera a que los datos estén disponibles. Revisa la conexión y la instalación del SQL.');
+  if (mode !== 'demo' && !isAdmin) throw new Error('Inicia sesión con una cuenta de operador autorizada en Meta y ajustes.');
+}
+export function databaseError(error) {
+  if (['PGRST202', 'PGRST205', '42P01', '42883'].includes(error?.code)) return 'Falta instalar la base de datos: ejecuta supabase/schema.sql en SQL Editor.';
+  if (error?.code === '42501') return 'Operador no autorizado. Revisa la tabla operators y las reglas RLS.';
+  if (error?.code === '22023') return error.message;
+  if (error?.code === '23514') return 'El importe o el total supera los límites admitidos.';
+  if (error?.code === 'invalid_credentials') return 'Correo o contraseña incorrectos.';
+  return error?.message || 'No se pudo conectar con Supabase.';
+}
+async function rpc(name, args) {
+  const { data, error } = await client.rpc(name, args);
+  if (error) throw new Error(databaseError(error));
+  return data;
+}
+let refreshTask, dirty = false;
+// Coalescer: una respuesta antigua nunca puede sobrescribir una consulta posterior.
+async function refresh() {
+  dirty = true;
+  if (refreshTask) return refreshTask;
+  refreshTask = (async () => {
+    while (dirty) {
+      dirty = false;
+      try {
+        const data = await rpc('get_event_snapshot');
+        if (!data?.event) throw new Error('No hay un evento activo. Ejecuta supabase/schema.sql.');
+        const e = data.event;
+        state = { totalCents: Number(e.total_cents), goalCents: Number(e.goal_cents), count: e.donation_count, generation: e.id, last: e.last_donation };
+        history = data.donations.map(d => ({ id: d.id, amountCents: Number(d.amount_cents), name: d.donor_name, message: d.message, createdAt: d.created_at }));
+        ready = true; connection = realtime ? 'Conectado en vivo' : 'Conectado · sincronización de respaldo';
+      } catch (error) { ready = false; connection = databaseError(error); }
+      emit();
+    }
+  })();
+  try { await refreshTask; } finally { refreshTask = null; }
+}
+async function mutation(name, args) {
+  await rpc(name, args);
+  // La RPC ya confirmó la escritura. No reenviar aunque falle la lectura posterior.
+  await refresh();
+}
+export async function addDonation(data, id) {
+  writable();
+  const donation = { id, amountCents: cents(data.amount), name: data.name.trim().slice(0, 80) || 'Anónimo', message: data.message.trim().slice(0, 240), createdAt: Date.now() };
+  if (mode === 'demo') return localChange(() => {
+    if (history.some(d => d.id === id)) return;
+    if (!Number.isSafeInteger(state.totalCents + donation.amountCents)) throw new Error('El total supera el límite admitido.');
+    state = { ...state, totalCents: state.totalCents + donation.amountCents, count: state.count + 1, last: donation };
+    history = [donation, ...history].slice(0, 30);
+  });
+  return mutation('register_donation', { p_id: id, p_event_id: state.generation, p_amount_cents: donation.amountCents, p_donor_name: donation.name, p_message: donation.message });
+}
+export async function setGoal(value) {
+  writable(); const goalCents = cents(value);
+  if (mode === 'demo') return localChange(() => { state = { ...state, goalCents }; });
+  return mutation('set_event_goal', { p_event_id: state.generation, p_goal_cents: goalCents });
+}
+export async function resetEvent() {
+  writable();
+  if (mode === 'demo') return localChange(() => { state = { ...initial(), goalCents: state.goalCents, generation: crypto.randomUUID() }; history = []; });
+  return mutation('reset_event', { p_event_id: state.generation });
+}
+async function applySession(session) {
+  const revision = ++sessionRevision;
+  user = session?.user || null; isAdmin = false; emit();
+  if (user) {
+    const { data, error } = await client.from('operators').select('user_id').eq('user_id', user.id).maybeSingle();
+    const authorized = !error && !!data;
+    if (revision !== sessionRevision) return authorized;
+    isAdmin = authorized; emit();
+    return authorized;
+  }
+}
+export async function login(email, password) {
+  if (!client) throw new Error('El acceso de operador requiere Supabase; sal de la demostración.');
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(databaseError(error));
+  const authorized = await applySession(data.session);
+  if (!authorized) throw new Error(`Cuenta sin permiso de operador. Añade su UID a operators: ${data.user.id}`);
+}
+export async function logout() {
+  if (!client) return;
+  const { error } = await client.auth.signOut();
+  if (error) throw new Error(databaseError(error));
+  await applySession(null);
+}
+export async function initialize() {
+  try {
+    if (mode === 'demo') {
+      readLocal(); connection = 'Demostración local'; ready = true;
+      addEventListener('storage', e => { if (e.key === STATE_KEY) { try { readLocal(); emit(); } catch { ready = false; connection = 'Error de almacenamiento'; emit(); } } });
+      emit(); return;
+    }
+    connection = 'Conectando a Supabase…'; emit();
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
+    client = createClient(supabaseConfig.url, supabaseConfig.publishableKey);
+    // No esperar llamadas Auth dentro del callback: Supabase mantiene un bloqueo interno.
+    client.auth.onAuthStateChange((_event, session) => { setTimeout(() => { applySession(session).catch(() => { isAdmin = false; emit(); }); }, 0); });
+    client.channel('desfile-rosa-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => { refresh(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_settings' }, () => { refresh(); })
+      .subscribe(status => { realtime = status === 'SUBSCRIBED'; if (status !== 'CLOSED') refresh(); });
+    await refresh();
+    // Respaldo si WebSocket está bloqueado o se pierde una notificación.
+    setInterval(() => { if (!document.hidden) refresh(); }, 10000);
+    addEventListener('online', () => { refresh(); });
+    addEventListener('offline', () => { ready = false; connection = 'Sin conexión · no se pueden registrar aportes'; emit(); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  } catch { ready = false; connection = 'No se pudo cargar Supabase. Revisa tu conexión y permite cdn.jsdelivr.net.'; emit(); }
+}

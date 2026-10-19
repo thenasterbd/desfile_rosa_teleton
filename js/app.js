@@ -1,4 +1,4 @@
-import { initialize, subscribe, saveConfig, login, logout, setGoal, resetEvent } from './firebase-config.js';
+import { initialize, subscribe, login, logout, setGoal, resetEvent } from './supabase-config.js';
 import { setupOperator } from './operador.js';
 import { setupProjector } from './proyector.js';
 const $ = selector => document.querySelector(selector);
@@ -26,8 +26,7 @@ let toastTimer;
 export function toast(message) { $('#toast').textContent = message; $('#toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4500); }
 function feedback(id, message, error = false) { $(id).textContent = message; $(id).classList.toggle('error', error); }
 export function errorMessage(error) {
-  const messages = { 'auth/invalid-credential': 'Correo o contraseña incorrectos.', 'auth/invalid-email': 'El correo no es válido.', 'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos.', 'auth/network-request-failed': 'No se pudo conectar. Revisa tu conexión.', 'permission-denied': 'Tu cuenta no tiene permisos. Revisa las reglas y la lista de operadores.', unavailable: 'No hay conexión con Firebase. Comprueba la red y vuelve a intentar.', 'auth/operation-not-allowed': 'Activa el acceso por correo y contraseña en Firebase Authentication.' };
-  return messages[error.code] || (error.code ? `La operación no se completó (${error.code}).` : error.message || 'No se pudo completar la operación.');
+  return error.message || 'No se pudo completar la operación.';
 }
 $('#fullscreen').addEventListener('click', async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { toast('El navegador no permite pantalla completa. Puedes usar F11.'); } });
 $('#sound').checked = sound;
@@ -40,19 +39,21 @@ async function activateAudio() {
 addEventListener('pointerdown', activateAudio);
 addEventListener('keydown', activateAudio);
 $('#sound').addEventListener('change', async e => { sound = e.target.checked; localStorage.setItem('rosa-sound', String(sound)); if (sound) { await activateAudio(); chime(); } else $('#sound-status').textContent = 'Sonido desactivado'; });
-$('#firebase-form').addEventListener('submit', e => { e.preventDefault(); try { saveConfig($('#firebase-json').value); location.reload(); } catch (error) { feedback('#firebase-feedback', errorMessage(error), true); } });
 $('#login-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('[type=submit]'); button.disabled = true; try { await login($('#email').value.trim(), $('#password').value); $('#password').value = ''; feedback('#login-feedback', 'Sesión de operador iniciada.'); } catch (error) { feedback('#login-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 $('#logout').addEventListener('click', async () => { try { await logout(); $('#password').value = ''; feedback('#login-feedback', 'Sesión cerrada.'); } catch (error) { feedback('#login-feedback', errorMessage(error), true); } });
-$('#goal-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('button'); button.disabled = true; try { await setGoal($('#goal-input').value); feedback('#goal-feedback', 'Meta guardada y sincronizada.'); } catch (error) { feedback('#goal-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
+$('#goal-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('button'); button.disabled = true; try { await setGoal($('#goal-input').value); feedback('#goal-feedback', 'Meta guardada.'); } catch (error) { feedback('#goal-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 $('#reset').addEventListener('click', () => { $('#reset-form').reset(); feedback('#reset-feedback', ''); $('#reset-dialog').showModal(); });
 $('#cancel-reset').addEventListener('click', () => $('#reset-dialog').close());
 $('#reset-form').addEventListener('submit', async e => { e.preventDefault(); if ($('#reset-confirm').value !== 'REINICIAR') return; const button = e.target.querySelector('[type=submit]'); button.disabled = true; try { await resetEvent(); $('#reset-dialog').close(); toast('Nuevo evento iniciado. El contador está en cero.'); } catch (error) { feedback('#reset-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
   $('#connection').textContent = connection;
+  $('#database-status').textContent = connection;
+  $('#database-status').hidden = ready;
   $('.header-status').dataset.state = ready ? 'ready' : 'error';
-  $('#footer-mode').textContent = mode === 'demo' ? 'DEMO LOCAL · USD' : 'FIREBASE · USD';
+  $('#footer-mode').textContent = mode === 'demo' ? 'DEMO LOCAL · USD' : 'SUPABASE · USD';
   $('#operator-mode').textContent = mode === 'demo' ? 'Demostración · solo este navegador' : isAdmin ? 'Operador autorizado' : 'Lectura · inicia sesión';
   $('#logout').hidden = !user;
+  $('#account-status').textContent = user ? `${isAdmin ? 'Operador autorizado' : 'Cuenta sin autorización'} · ${user.email}` : 'Sin sesión de operador';
   if (document.activeElement !== $('#goal-input')) $('#goal-input').value = state.goalCents / 100;
 });
 setupOperator(); setupProjector(chime); initialize();

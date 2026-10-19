@@ -1,8 +1,35 @@
-# Desfile Rosa · Teletón en vivo
+# Desfile Rosa · Teletón con Supabase
 
-SPA estática en español, HTML, CSS, Tailwind CDN y JavaScript ES Modules. Moneda: USD. Sin proceso de compilación. Esta herramienta registra aportes; no procesa pagos ni verifica transferencias.
+Aplicación estática en español con tres vistas, sin compilación, preparada para GitHub Pages. Moneda: USD. Registra aportes, no procesa pagos ni confirma transferencias bancarias.
 
-## Probar en el entorno local
+## 1. Instalar la base de datos (solo una vez)
+
+El proyecto público de Supabase ya está configurado en `js/supabase-config.js` con la URL y la clave publishable facilitadas por el propietario. Esa clave no es una contraseña administrativa. **Nunca** pongas una clave secret/service_role en estos archivos.
+
+1. Abre tu proyecto en Supabase y entra a **SQL Editor → New query**.
+2. Copia **todo** el archivo [`supabase/schema.sql`](supabase/schema.sql) y pulsa **Run**. Debe terminar sin errores. Se crean:
+   - `events`: meta, total en centavos y resumen del evento.
+   - `donations`: aportes, vinculados a un evento.
+   - `operators`: UUID de las cuentas autorizadas.
+   - `app_settings`: referencia al evento activo.
+3. El SQL activa RLS, permite lectura pública para el proyector, bloquea escrituras directas desde el navegador y activa Realtime para `events` y `app_settings`. Solo las funciones `register_donation`, `set_event_goal` y `reset_event` pueden modificar datos desde una cuenta autorizada.
+4. Puedes volver a ejecutar el archivo para actualizar las funciones sin reiniciar la recaudación. Está diseñado para estas tablas nuevas; si ya creaste tablas con los mismos nombres y otra estructura, no las borres: revisa las diferencias antes de ejecutarlo.
+
+## 2. Crear y autorizar a tu operador
+
+1. En **Authentication → Users → Add user → Create new user**, crea una cuenta con correo y contraseña. Si aparece la opción, confirma el correo al crearla. No compartas la contraseña en el chat ni la guardes en GitHub.
+2. Copia el **User UID** de esa cuenta.
+3. En **Table Editor → operators → Insert row**, pega ese UUID en `user_id` y guarda. No necesitas rellenar otro campo. Crear una cuenta en Authentication por sí solo no autoriza operaciones.
+4. Abre la web → **Meta y ajustes**, inicia sesión con esa cuenta y guarda la meta. Los visitantes pueden abrir el proyector sin iniciar sesión.
+5. Para revocar un operador elimina su fila en `operators`. La base de datos rechaza inmediatamente las próximas escrituras aunque una pantalla aún muestre una sesión abierta. La app no incluye registro público; puedes desactivar nuevos registros en Authentication si no los necesitas.
+
+## 3. Publicar con GitHub Pages
+
+En GitHub → **Settings → Pages**, selecciona **GitHub Actions** como origen. El workflow `.github/workflows/pages.yml` publica los archivos web y el SQL público cuando hay un push a `main`; también puedes ejecutarlo manualmente desde Actions. Comprueba que tu plan admite Pages si el repositorio es privado.
+
+El despliegue de GitHub no ejecuta el SQL de Supabase. La instalación de la base de datos y la creación del operador se hacen en el panel de Supabase. GitHub aloja la web HTTPS; Supabase mantiene la base de datos y la conexión en vivo. No se necesita Vercel.
+
+## Desarrollo y demo
 
 Desde la carpeta del repositorio:
 
@@ -10,34 +37,24 @@ Desde la carpeta del repositorio:
 python -m http.server 4173 --bind 0.0.0.0
 ```
 
-Abre el servidor con un navegador moderno. No abras index.html como archivo: los módulos requieren HTTP. Las vistas usan `#proyector`, `#operador` y `#ajustes`. La demostración comienza en cero; registra aportes, cambia la meta y prueba el reinicio. Dos pestañas del mismo origen se sincronizan mediante almacenamiento local y Web Locks. El demo no sincroniza computadoras, perfiles o navegadores distintos. El almacenamiento privado/restringido puede impedir su funcionamiento. El modo demo está siempre identificado y no es adecuado para el evento real.
+Abre la web mediante HTTP, nunca como archivo local. Las rutas de vistas son `#proyector`, `#operador` y `#ajustes`. Para una demostración sin base de datos usa `?demo=1#proyector` o el botón en ajustes. Está claramente marcada y solo sincroniza pestañas del mismo origen con localStorage y Web Locks. **Las donaciones del demo no se envían a Supabase**. Para volver al evento real, usa el botón “Ir al evento en vivo”.
 
-## Firebase para un evento real
+## Integridad y sincronización
 
-1. Crea un proyecto en Firebase Console y registra una aplicación web. Crea Firestore en modo producción; selecciona una región cercana a tu audiencia. No actives reglas de prueba abiertas.
-2. En Firestore → Reglas, publica el contenido completo de `firestore.rules`.
-3. En Authentication → Métodos de acceso, activa correo/contraseña. En Usuarios, crea las cuentas de tus operadores. Nunca publiques contraseñas.
-4. Para cada operador, copia su UID de Authentication. Desde la consola de Firestore crea un documento `admins/UID` con el campo booleano `enabled: true`. La existencia del documento autoriza; elimínalo para revocar acceso. Ningún cliente puede crear estos documentos. No es necesario dar permisos administrativos de Firebase a operadores.
-5. Copia el objeto de configuración **pública web** del proyecto. Para todos los dispositivos, sustituye el `null` de `firebaseConfig` en `js/firebase-config.js` por ese objeto real. No incluyas cuentas de servicio ni claves privadas. Alternativamente, pégalo como JSON en Meta y ajustes → Conectar mi proyecto Firebase en cada navegador (se guarda solo en ese navegador y tiene menor prioridad que la configuración del archivo).
-6. Añade el dominio publicado a Authentication → Configuración → Dominios autorizados. Usa el mismo proyecto en todos los dispositivos.
-7. Recarga, inicia sesión como operador desde Meta y ajustes y guarda la meta para inicializar el evento. Abre la vista proyector en otro dispositivo: es de lectura pública y no requiere sesión. Registra un aporte y comprueba la actualización en ambas pantallas.
+- Todos los montos son enteros en centavos. Las funciones SQL comprueban autorización y límites en el servidor.
+- Cada aporte tiene un UUID. Los reintentos del mismo UUID y contenido no duplican el total. El operador conserva ese UUID si falla el envío y vuelve a intentarlo sin modificar sus campos.
+- Las tres escrituras bloquean la fila del evento activo durante la transacción. Total, historial y último aporte se guardan juntos. Un aporte pendiente de un evento ya reiniciado se rechaza en vez de entrar al nuevo evento.
+- `get_event_snapshot` devuelve total e historial consistentes en una única consulta, respetando RLS. El proyector usa Realtime, consulta de respaldo cada 10 segundos y refresco al recuperar visibilidad/conexión. El tiempo efectivo de sincronización depende de la red; no se garantiza menos de un segundo.
+- Si una escritura queda confirmada pero falla su lectura posterior, la app avisa de la falta de conexión sin reenviar el aporte automáticamente. Si la respuesta de escritura se pierde, vuelve a intentar sin cambiar los datos para conservar el UUID.
+- Reiniciar crea un evento nuevo con la misma meta y conserva los aportes anteriores en Supabase. Solo se muestran los últimos 30 del evento activo.
+- Nombres, mensajes y eventos archivados son de lectura pública. No introduzcas datos sensibles e informa a los donantes. Los operadores son personas de confianza. Supervisa consumo, copias de seguridad, acceso y costes del proyecto antes del evento.
 
-La configuración pública identifica el proyecto; las reglas y Authentication protegen las escrituras. El total se mantiene mediante transacciones con importes enteros en centavos y un identificador de aporte para evitar duplicados al reintentar el mismo envío. Las transacciones requieren conexión al servidor: no se promete que un aporte desconectado esté guardado. `onSnapshot` entrega cambios sin recargar; el tiempo efectivo depende de la red y Firebase, no se garantiza menos de un segundo. La interfaz distingue datos en caché de una conexión activa.
+## Proyección
 
-Solo se escuchan el resumen y los últimos 30 aportes del evento. Los reinicios crean otra generación y conservan el historial anterior en Firestore; la demo conserva solo los últimos 30 aportes del evento activo. Los nombres y mensajes son públicos: informa a los donantes y no registres información sensible. No hay un límite de consultas por parte del cliente: supervisa las cuotas, costes y abuso en Firebase; considera App Check antes de eventos de gran audiencia. Las cuentas autorizadas son de confianza y tienen control de la meta y del total. Las reglas no sustituyen una auditoría de recaudación.
+El sonido es una preferencia local. Actívalo con un clic en ajustes para autorizar Web Audio. La primera carga no celebra aportes históricos; las siguientes actualizaciones generan glow, sonido y confetti al cruzar la meta. El modo de movimiento reducido omite confetti y animaciones. La pantalla completa requiere un gesto del usuario.
 
-## Publicar con GitHub Pages
-
-El flujo `.github/workflows/pages.yml` publica únicamente `index.html`, `css/` y `js/` al subir cambios a `main`. En el repositorio GitHub → Settings → Pages, elige **GitHub Actions** como origen. Después ejecuta el flujo “Publicar Desfile Rosa” o envía un commit a main. Si el repositorio es privado, comprueba que tu plan admite Pages. GitHub proporciona alojamiento estático HTTPS; Firebase proporciona la base de datos. No hay un servidor Node que administrar ni se necesita Vercel.
-
-Configura Firebase antes de publicar para uso real. El despliegue de Pages **no publica las reglas de Firestore**: hazlo en la consola o con Firebase CLI autenticado (`firebase deploy --only firestore:rules --project TU_ID_REAL`). No incluyas autenticación de Firebase CLI en GitHub ni en el repositorio.
-
-## Proyección y dependencias
-
-Activa el sonido en cada proyector y haz clic en la página para que el navegador autorice Web Audio. El primer snapshot no reproduce sonido ni confetti; sí lo hacen los aportes posteriores y el cruce de la meta. Pantalla completa requiere un gesto del usuario. La preferencia de movimiento reducido desactiva confetti y animaciones.
-
-Firebase usa módulos v10.14.1 desde www.gstatic.com, confetti v1.9.3 desde cdn.jsdelivr.net, Tailwind v3.4.17 desde cdn.tailwindcss.com y tipografías de Google Fonts. Los estilos de la aplicación están completos en CSS: si Tailwind o las fuentes no cargan, la interfaz sigue funcionando. Sin Firebase CDN no puede conectarse al backend; sin confetti CDN se omite únicamente ese efecto. El CDN de Tailwind se incluye por requisito, pero su compilación en navegador no es la opción recomendada para un despliegue endurecido de alto tráfico.
+La aplicación importa Supabase JS 2.118.0 y canvas-confetti 1.9.3 desde cdn.jsdelivr.net, Tailwind 3.4.17 desde cdn.tailwindcss.com y fuentes de Google Fonts. El CSS propio cubre la interfaz si Tailwind o las fuentes no cargan. Permite el dominio de tu proyecto Supabase y WebSocket HTTPS/WSS en la red de los dispositivos. Tailwind CDN se conserva por el requisito original; para tráfico elevado conviene compilarlo como recurso estático en un trabajo posterior.
 
 ## Verificación antes del evento
 
-Comprueba con el proyecto real: permisos de lectura pública y rechazo de escritura sin operador, dos dispositivos simultáneos, suma concurrente, meta, sonido, cruce al 100%, desconexión/reconexión y reinicio. El modo demo no valida Firebase. Conserva un registro externo de pagos para conciliación. El contador no confirma la recepción bancaria de los aportes.
+Tras ejecutar el SQL y crear el operador, abre dos dispositivos con el mismo proyecto, registra un aporte real de prueba y comprueba total, historial, meta y reinicio. Prueba también rechazo de escrituras sin sesión y con una cuenta no autorizada, desconexión/reconexión y acceso público del proyector. Las pruebas locales no demuestran que el SQL ya esté instalado en tu proyecto.

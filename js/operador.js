@@ -1,4 +1,4 @@
-import { addDonation, subscribe, money } from './firebase-config.js';
+import { addDonation, subscribe, money } from './supabase-config.js';
 import { errorMessage } from './app.js';
 export function setupOperator() {
   const form = document.querySelector('#donation-form'), amount = document.querySelector('#amount'), button = document.querySelector('#donate'), feedback = document.querySelector('#donation-feedback');
