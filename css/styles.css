@@ -332,9 +332,6 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 nav .settings-nav { display: flex; align-items: center; position: relative; }
 nav a.requires-login { color: #737078; background: #eeecef; }
 nav a.requires-login:hover { color: #514b55; background: #e3dfe5; }
-#account-menu summary { cursor: pointer; list-style: none; padding: 10px; border-radius: 8px; }
-#account-menu summary::-webkit-details-marker { display: none; }
-#account-menu summary:hover, #account-menu summary:focus-visible { background: var(--surface-tint); }
 .account-dropdown { position: absolute; right: 0; top: calc(100% + 10px); z-index: 30; min-width: 180px; padding: 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: 0 12px 30px #51263b18; }
 .account-dropdown a, .account-dropdown button { display: block; width: 100%; text-align: left; padding: 12px; font: inherit; font-size: 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; }
 .account-dropdown button { color: var(--secondary, #b91c50); }
@@ -342,7 +339,7 @@ nav a.requires-login:hover { color: #514b55; background: #e3dfe5; }
 .login-panel { max-width: 460px; margin: 0 auto 48px; }
 .login-panel .button { margin-top: 24px; }
 .session-footer { border-top: 1px solid var(--border); margin-top: 28px; }
-@media (max-width: 700px) { nav .settings-nav { flex: 1; } nav .settings-nav > a { flex: 1; } #account-menu summary { padding: 10px 6px; } }
+@media (max-width: 700px) { nav .settings-nav { flex: 1; } nav .settings-nav > a { flex: 1; } }
 
 .edit-donation { min-height: 44px; white-space: nowrap; }
 #edit-dialog { width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; }

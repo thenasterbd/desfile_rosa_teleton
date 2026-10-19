@@ -16,19 +16,30 @@ export function chime() {
     osc.start(now + index * .12); osc.stop(now + index * .12 + 1.2);
   });
 }
-let canOperate = false, requestedOperator = false;
+let canOperate = false, requestedOperator = false, menuAvailable = false;
+function setAccountMenu(open) {
+  const visible = open && menuAvailable;
+  $('#account-menu').hidden = !visible;
+  $('[data-view="ajustes"]').setAttribute('aria-expanded', String(visible));
+}
 function navigate() {
   let view = ['proyector', 'operador', 'ajustes'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'proyector';
   if (view === 'operador' && !canOperate) {
     requestedOperator = true; location.replace('#ajustes'); view = 'ajustes';
   }
-  $('#account-menu').open = false;
+  setAccountMenu(view === 'ajustes');
   document.querySelectorAll('.view').forEach(el => { el.hidden = el.id !== view; });
   document.querySelectorAll('[data-view]').forEach(el => { const active = el.dataset.view === view; el.classList.toggle('active', active); if (active) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
 }
 addEventListener('hashchange', navigate); navigate();
-addEventListener('click', e => { if (!e.target.closest('#account-menu')) $('#account-menu').open = false; });
-addEventListener('keydown', e => { if (e.key === 'Escape' && $('#account-menu').open) { $('#account-menu').open = false; $('#account-menu summary').focus(); } });
+$('[data-view="ajustes"]').setAttribute('aria-controls', 'account-menu');
+$('[data-view="ajustes"]').addEventListener('click', () => {
+  if (location.hash === '#ajustes') setAccountMenu($('#account-menu').hidden);
+});
+addEventListener('click', e => { if (!e.target.closest('.settings-nav')) setAccountMenu(false); });
+addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#account-menu').hidden) { setAccountMenu(false); $('[data-view="ajustes"]').focus(); }
+});
 $('[data-view="operador"]').addEventListener('click', () => {
   if (!canOperate) { requestedOperator = true; setTimeout(() => $('#email').focus(), 0); }
 });
@@ -53,7 +64,7 @@ $('#login-form').addEventListener('submit', async e => { e.preventDefault(); con
 document.querySelectorAll('[data-logout]').forEach(button => button.addEventListener('click', async () => {
   document.querySelectorAll('[data-logout]').forEach(el => { el.disabled = true; });
   try { await logout(); $('#password').value = ''; feedback('#login-feedback', 'Sesión cerrada.'); location.hash = 'ajustes'; $('#email').focus(); }
-  catch (error) { $('#account-menu').open = false; toast(errorMessage(error)); }
+  catch (error) { setAccountMenu(false); toast(errorMessage(error)); }
   finally { document.querySelectorAll('[data-logout]').forEach(el => { el.disabled = false; }); }
 }));
 $('#goal-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('button'); button.disabled = true; try { await setGoal($('#goal-input').value); feedback('#goal-feedback', 'Meta guardada.'); } catch (error) { feedback('#goal-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
@@ -90,7 +101,8 @@ subscribe(({ mode, connection, ready, user, isAdmin, state }) => {
   $('#settings-controls').hidden = !canOperate;
   $('#settings-controls').inert = !canOperate;
   $('#operador').inert = !canOperate;
-  $('#account-menu').hidden = !user || !isAdmin;
+  menuAvailable = !!user && isAdmin;
+  if (!menuAvailable) setAccountMenu(false);
   document.querySelectorAll('[data-logout]').forEach(el => { el.hidden = !user; });
   const operatorLink = $('[data-view="operador"]');
   operatorLink.classList.toggle('requires-login', !canOperate);
