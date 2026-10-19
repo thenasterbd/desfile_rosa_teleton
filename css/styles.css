@@ -3,7 +3,7 @@
 @font-face { font-family: 'Bebas Neue'; src: url('../assets/fonts/BebasNeue-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
 
 :root {
-  --bg: #e4c0d6;
+  --bg: #f5e6ef;
   --panel: #fff8fc;
   --accent: #e4c0d6;
   --action: #e0014d;
