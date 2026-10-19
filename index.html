@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0f172a"><meta name="description" content="Desfile Rosa · Centro de recaudación y proyección en vivo para nuestra Teletón.">
+<meta name="theme-color" content="#e4c0d6"><meta name="description" content="Desfile Rosa · Centro de recaudación y proyección en vivo para nuestra Teletón.">
 <title>Desfile Rosa · En vivo</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link rel="stylesheet" href="css/styles.css">
@@ -11,24 +11,29 @@
 </head>
 <body>
 <header class="topbar">
-<a class="brand" href="#proyector" aria-label="Desfile Rosa, inicio"><span class="brand-mark">♡</span><span>DESFILE <b>ROSA</b><small>JUNTOS HACEMOS MÁS</small></span></a>
+<a class="brand" href="#proyector" aria-label="Desfile Rosa, inicio"><span class="brand-mark" aria-hidden="true">♡</span><span>DESFILE <b>ROSA</b><small>JUNTOS POR UNA VIDA COLOR DE ROSA</small></span></a>
 <nav aria-label="Vistas principales"><a href="#proyector" data-view="proyector">◉ <span>Proyector</span></a><a href="#operador" data-view="operador">▦ <span>Panel operador</span></a><a href="#ajustes" data-view="ajustes">⚙ <span>Meta y ajustes</span></a></nav>
 <div class="header-status"><span class="status-dot"></span><span id="connection">Iniciando…</span></div>
 </header>
 <p id="database-status" class="status-banner" role="status">Conectando al evento…</p>
 <main>
 <section id="proyector" class="view" aria-labelledby="projector-title">
-<div class="section-heading"><div><p class="eyebrow">CADA APORTE CUENTA UNA HISTORIA</p><h1 id="projector-title">Una causa. <span>Miles de corazones.</span></h1><p class="subtitle">Transformamos tu generosidad en nuevas oportunidades.</p></div><button class="button ghost" id="fullscreen">⛶ <span>Pantalla completa</span></button></div>
+<div class="campaign-header">
+  <div class="organizer"><svg class="organizer-symbol" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="32" cy="32" r="20"/><path d="M32 2v7m0 46v7M2 32h7m46 0h7M11 11l5 5m32 32 5 5M11 53l5-5m32-32 5-5"/><path d="M32 42c-4-3-12-9-12-15 0-8 9-9 12-3 3-6 12-5 12 3 0 6-8 12-12 15Z"/></g></svg><div><strong>Rotaract</strong><span>Valle de Santiago</span><small>SOLIDARIDAD EN ACCIÓN</small></div></div>
+  <h1 id="projector-title" class="campaign-title"><span>DESFILE</span><span>ROSA<span class="title-spark" aria-hidden="true">✦</span></span></h1>
+  <div class="campaign-cause"><svg class="ribbon" viewBox="0 0 80 110" aria-hidden="true"><path d="M22 31C10 1 64-8 62 26 60 50 32 79 16 99L3 78C28 55 47 36 47 20 47 7 29 8 31 22L75 81 60 103Z" fill="currentColor"/><path d="M22 31 31 22 75 81 60 103Z" fill="#f54891"/></svg><p>Juntos por una<br><em>vida color de rosa.</em></p></div>
+</div>
+<div class="section-heading projector-intro"><div><p class="eyebrow">UNIDOS POR UNA MISMA CAUSA</p><h2>Tu generosidad <span>cambia vidas.</span></h2><p class="subtitle">Cada aporte nos acerca a una nueva oportunidad.</p></div><button class="button ghost" id="fullscreen">⛶ <span>Pantalla completa</span></button></div>
 <div class="live-layout">
 <article class="total-card">
-<div class="card-top"><span class="live-label"><i></i> RECAUDACIÓN EN VIVO</span><span class="edition">TELETÓN · DESFILE ROSA</span></div>
+<div class="card-top"><span class="live-label"><i></i> RECAUDACIÓN EN VIVO</span><span class="edition">JUNTOS HACEMOS MÁS</span></div>
 <div class="total-content"><p class="overline">Juntos hemos recaudado</p><div id="total" class="total" aria-label="Total recaudado">$0<small>.00</small></div><div class="support-tag"><span>♡</span> Un aporte, una nueva posibilidad</div></div>
 <div class="progress-heading"><span>Camino a nuestra meta</span><strong id="percent">0%</strong></div><div id="progress" class="progress-track" role="progressbar" aria-label="Avance hacia la meta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill"></div></div>
 <div class="goal-row"><span>¡Cada vez más cerca!</span><span>Meta global <strong id="goal">$100,000.00</strong></span></div>
 </article>
-<aside class="latest-card"><div class="card-top"><span class="eyebrow">EL APORTE MÁS RECIENTE</span><span class="tiny-heart">♡</span></div><div class="donor-avatar" id="donor-avatar">♡</div><p class="latest-caption">Gracias de corazón a</p><h2 id="last-name">Tu nombre puede estar aquí</h2><p id="last-amount" class="latest-amount">$0.00</p><blockquote id="last-message">El próximo gran cambio comienza con un pequeño gesto.</blockquote><div class="latest-footer"><span class="status-dot"></span><span id="last-time">Esperando el primer aporte</span></div></aside>
+<aside class="latest-card"><div class="card-top"><span class="eyebrow">UN CORAZÓN QUE SE SUMA</span><span class="tiny-heart">♡</span></div><div class="donor-avatar" id="donor-avatar">♡</div><p class="latest-caption">Gracias de corazón a</p><h2 id="last-name">Tu nombre puede estar aquí</h2><p id="last-amount" class="latest-amount">$0.00</p><blockquote id="last-message">El próximo gran cambio comienza con un pequeño gesto.</blockquote><div class="latest-footer"><span class="status-dot"></span><span id="last-time">Esperando el primer aporte</span></div></aside>
 </div>
-<div class="impact-grid"><article><span class="stat-icon">♡</span><div><strong id="count">0</strong><p>Aportes que hacen la diferencia</p></div></article><article><span class="stat-icon">↗</span><div><strong id="remaining">$100,000.00</strong><p>Para llegar a nuestra meta</p></div></article><article class="message-stat"><span class="stat-icon">✧</span><div><strong>La solidaridad nos une</strong><p>Hoy podemos cambiar muchas vidas.</p></div></article></div>
+<div class="impact-grid"><article><span class="stat-icon">♡</span><div><strong id="count">0</strong><p>Aportes que hacen la diferencia</p></div></article><article><span class="stat-icon"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="m5 17 14-14M7 3h12v12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong id="remaining">$100,000.00</strong><p>Para llegar a nuestra meta</p></div></article><article class="message-stat"><span class="stat-icon">✧</span><div><strong>La solidaridad nos une</strong><p>Juntos, por una vida color de rosa.</p></div></article></div>
 <div class="bottom-note"><span>✦</span> No importa el tamaño del aporte, sino el tamaño del corazón.</div>
 </section>
 <section id="operador" class="view" hidden aria-labelledby="operator-title"><div class="section-heading"><div><p class="eyebrow">CENTRO DE CONTROL</p><h1 id="operator-title">Cada aporte <span>hace la diferencia.</span></h1><p class="subtitle">Registra una donación y compártela en la pantalla en vivo.</p></div><span class="pill" id="operator-mode">Modo demostración</span></div><div class="operator-grid"><article class="panel"><h2>Registrar un aporte</h2><p class="muted">Los campos de nombre y mensaje son opcionales.</p><form id="donation-form"><label for="amount">Monto del aporte ($)</label><input id="amount" name="amount" type="number" min="0.01" max="100000000" step="0.01" placeholder="0.00" required inputmode="decimal"><div class="quick-amounts"><button type="button" data-add="50">+$50</button><button type="button" data-add="100">+$100</button><button type="button" data-add="500">+$500</button><button type="button" data-add="1000">+$1,000</button></div><label for="donor">Nombre / Empresa <span>opcional</span></label><input id="donor" name="donor" maxlength="80" placeholder="Anónimo"><label for="message">Mensaje o dedicatoria <span>opcional</span></label><textarea id="message" name="message" maxlength="240" rows="3" placeholder="Unas palabras que inspiran…"></textarea><button id="donate" class="button primary full" type="submit">♡ Registrar donación</button><p id="donation-feedback" class="feedback" role="status"></p></form></article><article class="panel history"><div class="history-heading"><h2>Aportes recientes</h2><span class="pill">EN VIVO</span></div><p class="muted">Últimos 30 aportes del evento actual.</p><div class="table-wrap"><table><thead><tr><th>Donante / Mensaje</th><th>Monto</th><th>Hora</th></tr></thead><tbody id="history-body"></tbody></table></div><p id="empty-history" class="empty">♡<br>Una gran historia comienza con el primer aporte.</p></article></div></section>
