@@ -361,7 +361,7 @@ dialog.event-modal::backdrop { background: #3f1b3466; backdrop-filter: blur(7px)
 .projection-mode #main-content { box-sizing: border-box; width: 100%; max-width: none; height: 100dvh; padding: clamp(12px, 2.2dvh, 28px) clamp(16px, 3vw, 64px); }
 .projection-mode #proyector { display: grid; height: 100%; min-height: 0; grid-template-rows: minmax(0, 1fr) minmax(0, 3fr) minmax(0, .55fr); gap: clamp(10px, 1.8dvh, 22px); animation: none; }
 .projection-mode #proyector .projector-intro { display: none; }
-.projection-mode #proyector .campaign-header { min-height: 0; padding: 0; gap: 3vw; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+.projection-mode #proyector .campaign-header { min-height: 0; padding: 0; gap: clamp(12px, 2vw, 38px); grid-template-columns: min(29vw, 44dvh) minmax(0, 1fr); }
 .projection-mode #proyector .campaign-heading, .projection-mode #proyector .campaign-title { height: 100%; min-height: 0; }
 .projection-mode #proyector .event-logo { height: 100%; max-height: 100%; width: min(100%, 44dvh); object-fit: contain; object-position: left center; margin: 0; }
 .projection-mode #proyector .campaign-side { min-height: 0; flex-direction: row; align-items: center; justify-content: space-between; gap: clamp(10px, 1.5vw, 30px); }
