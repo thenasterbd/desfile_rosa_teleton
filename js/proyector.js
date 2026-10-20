@@ -4,7 +4,7 @@ export function setupProjector(chime) {
   const $ = selector => document.querySelector(selector);
   let previous, shown = 0, animation;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const butterflies = setupButterflies();
+  const butterflies = setupButterflies($('#proyector'));
   function animate(target) {
     cancelAnimationFrame(animation);
     $('#total').classList.toggle('long-total', money(target).length > 13);

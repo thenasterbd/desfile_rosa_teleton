@@ -2,12 +2,12 @@ const butterflyURL = new URL('../assets/butterfly.svg', import.meta.url).href;
 const MAX_BUTTERFLIES = 160;
 
 // Decoration only: no input handling, data writes or external dependencies.
-export function setupButterflies() {
+export function setupButterflies(projector) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const layer = document.createElement('div');
   layer.className = 'butterfly-layer';
   layer.setAttribute('aria-hidden', 'true');
-  document.body.append(layer);
+  projector.append(layer);
   const active = new Map();
   const preload = new Image();
   preload.src = butterflyURL;
@@ -23,7 +23,7 @@ export function setupButterflies() {
   }
 
   function play() {
-    if (reduced.matches || document.hidden || typeof layer.animate !== 'function') return;
+    if (projector.hidden || reduced.matches || document.hidden || typeof layer.animate !== 'function') return;
     const width = innerWidth, height = innerHeight;
     const count = width < 700 ? 40 : 72;
     const limit = width < 700 ? 80 : MAX_BUTTERFLIES;
@@ -76,6 +76,9 @@ export function setupButterflies() {
       flight.finished.then(() => remove(particle), () => remove(particle));
     }
   }
+
+  new MutationObserver(() => { if (projector.hidden) clear(); })
+    .observe(projector, { attributes: true, attributeFilter: ['hidden'] });
 
   reduced.addEventListener('change', () => { if (reduced.matches) clear(); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) clear(); });
