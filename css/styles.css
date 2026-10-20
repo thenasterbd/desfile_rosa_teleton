@@ -219,25 +219,6 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
 @keyframes arrive { from { opacity: .5; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 :fullscreen body { overflow: auto; }
 :fullscreen .topbar, :fullscreen footer, :fullscreen .bottom-note, :fullscreen #first-donation, :fullscreen #fullscreen { display: none; }
-:fullscreen main { max-width: 1800px; padding-top: 20px; }
-:fullscreen .campaign-header { padding: 12px 0 16px; border: 0; }
-:fullscreen .event-logo { width: 350px; }
-:fullscreen .campaign-message { font-size: clamp(38px, 3.3vw, 64px); }
-:fullscreen #proyector .overline, :fullscreen #proyector .progress-heading, :fullscreen #proyector .goal-row { font-size: 22px; }
-:fullscreen #proyector .goal-row > span:first-child, :fullscreen #proyector .goal-row strong, :fullscreen #proyector .progress-heading strong { font-size: 24px; }
-:fullscreen #proyector .support-tag, :fullscreen #proyector .latest-caption, :fullscreen #proyector .latest-footer, :fullscreen #proyector .impact-grid p { font-size: 18px; }
-:fullscreen .total-card { padding: 40px 48px; }
-:fullscreen .total { font-size: clamp(80px, 15cqw, 190px); }
-:fullscreen .total.long-total { font-size: clamp(30px, 8cqw, 110px); }
-:fullscreen .total-content { padding: 45px 0 32px; }
-:fullscreen .latest-card { padding: 38px; }
-:fullscreen .latest-card h2 { font-size: 28px; }
-:fullscreen .latest-amount { font-size: 45px; }
-:fullscreen .latest-card blockquote { font-size: 28px; }
-:fullscreen .overline, :fullscreen .progress-heading, :fullscreen .goal-row { font-size: 17px; }
-:fullscreen .goal-row strong { font-size: 20px; }
-:fullscreen .impact-grid { margin-top: 20px; }
-:fullscreen .impact-grid article { padding-block: 10px; }
 @media (min-width: 1700px) { footer { margin-inline: auto; } }
 @media (max-width: 1120px) {
   .topbar { padding-inline: 4%; gap: 20px; }
@@ -270,7 +251,6 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   .event-logo { width: min(100%, 360px); margin-inline: auto; }
   .campaign-caption { font-size: 14px; margin: 0; }
   .campaign-message { font-size: clamp(28px, 7vw, 36px); }
-  :fullscreen .campaign-message { font-size: clamp(28px, 7vw, 36px); }
   .campaign-side { flex-direction: column; align-items: flex-start; gap: 14px; }
   .organizer-label { font-size: 11px; }
   .organizer { width: 150px; max-width: 100%; }
@@ -312,13 +292,6 @@ dialog p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   footer { flex-wrap: wrap; font-size: 9px; }
   footer > span:nth-child(2) { width: 100%; order: 3; }
   .connection-notice { align-items: flex-start; flex-direction: column; gap: 5px; padding: 14px; }
-  :fullscreen main { padding-top: 10px; }
-  :fullscreen .total-card { padding: 24px; }
-  :fullscreen .total { font-size: clamp(40px, 16cqw, 100px); }
-  :fullscreen .total.long-total { font-size: clamp(22px, 8cqw, 60px); }
-  :fullscreen .latest-card { padding: 26px; }
-  :fullscreen .latest-card h2 { font-size: 22px; }
-  :fullscreen .latest-card blockquote { font-size: 23px; }
 }
 /* Flight paths are animated with transforms and cannot intercept event controls. */
 .butterfly-layer { position: fixed; inset: 0; z-index: 15; overflow: hidden; pointer-events: none; }
@@ -382,3 +355,67 @@ dialog.event-modal::backdrop { background: #3f1b3466; backdrop-filter: blur(7px)
 .user-pagination { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 18px 0; font-size: 12px; }
 #manage-form { margin: 24px 0; padding: 20px; background: #fff6fa; border: 1px solid #edc7d8; border-radius: 16px; }
 #manage-form h3 { font-size: 18px; margin-bottom: 10px; }
+
+/* El proyector en pantalla completa ocupa exactamente el área visible. */
+.projection-mode, .projection-mode body { height: 100%; overflow: hidden; }
+.projection-mode #main-content { box-sizing: border-box; width: 100%; max-width: none; height: 100dvh; padding: clamp(12px, 2.2dvh, 28px) clamp(16px, 3vw, 64px); }
+.projection-mode #proyector { display: grid; height: 100%; min-height: 0; grid-template-rows: minmax(0, 1fr) minmax(0, 3fr) minmax(0, .55fr); gap: clamp(10px, 1.8dvh, 22px); animation: none; }
+.projection-mode #proyector .projector-intro { display: none; }
+.projection-mode #proyector .campaign-header { min-height: 0; padding: 0; gap: 3vw; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+.projection-mode #proyector .campaign-heading, .projection-mode #proyector .campaign-title { height: 100%; min-height: 0; }
+.projection-mode #proyector .event-logo { height: 100%; max-height: 100%; width: min(100%, 44dvh); object-fit: contain; object-position: left center; margin: 0; }
+.projection-mode #proyector .campaign-side { min-height: 0; flex-direction: row; align-items: center; justify-content: space-between; gap: clamp(10px, 1.5vw, 30px); }
+.projection-mode #proyector .campaign-message { font-size: clamp(20px, min(3.1vw, 5.4dvh), 64px); line-height: 1.15; margin: 0; }
+.projection-mode #proyector .organizer-signature { flex-direction: column; align-items: flex-start; gap: 5px; margin: 0; flex-shrink: 0; }
+.projection-mode #proyector .organizer-label { font-size: clamp(10px, 1.5dvh, 16px); }
+.projection-mode #proyector .organizer { width: clamp(85px, 11vw, 210px); }
+.projection-mode #proyector .live-layout { min-height: 0; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: clamp(12px, 1.8vw, 30px); }
+.projection-mode #proyector .total-card, .projection-mode #proyector .latest-card { min-height: 0; padding: clamp(16px, 2.8dvh, 36px) clamp(18px, 2.3vw, 44px); border-radius: clamp(18px, 2vw, 30px); }
+.projection-mode #proyector .total-card { display: flex; flex-direction: column; }
+.projection-mode #proyector .card-top { gap: 10px; }
+.projection-mode #proyector .live-label, .projection-mode #proyector .edition { font-size: clamp(10px, 1.6dvh, 16px); }
+.projection-mode #proyector .total-content { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; padding: 1dvh 0; }
+.projection-mode #proyector .overline { font-size: clamp(16px, 2.5dvh, 28px); margin: 0 0 .7dvh; }
+.projection-mode #proyector .total { font-size: clamp(42px, min(17cqw, 20dvh), 220px); line-height: 1.1; white-space: nowrap; }
+.projection-mode #proyector .total.long-total { font-size: clamp(22px, min(8cqw, 15dvh), 140px); }
+.projection-mode #proyector .support-tag { font-size: clamp(11px, 1.9dvh, 21px); margin-top: 1dvh; }
+.projection-mode #proyector .progress-heading, .projection-mode #proyector .goal-row { font-size: clamp(12px, 2.1dvh, 24px); line-height: 1.3; gap: 12px; }
+.projection-mode #proyector .goal-row { flex-wrap: wrap; }
+.projection-mode #proyector .progress-heading strong, .projection-mode #proyector .goal-row strong, .projection-mode #proyector .goal-row > span:first-child { font-size: clamp(14px, 2.4dvh, 28px); }
+.projection-mode #proyector .progress-track { height: clamp(7px, 1dvh, 12px); margin: 1.5dvh 0; flex-shrink: 0; }
+.projection-mode #proyector .latest-card { --latest-fit: 1; }
+.projection-mode #proyector .latest-card .card-top { margin-bottom: 1.8dvh; }
+.projection-mode #proyector .latest-card .eyebrow { font-size: calc(clamp(10px, 1.6dvh, 18px) * var(--latest-fit)); }
+.projection-mode #proyector .latest-caption { font-size: calc(clamp(12px, 1.9dvh, 22px) * var(--latest-fit)); margin-bottom: .8dvh; }
+.projection-mode #proyector .latest-card h2 { font-size: calc(clamp(18px, 3dvh, 36px) * var(--latest-fit)); line-height: 1.2; }
+.projection-mode #proyector .latest-amount { font-size: calc(clamp(26px, 5dvh, 60px) * var(--latest-fit)); line-height: 1.15; margin: 1.5dvh 0; }
+.projection-mode #proyector .latest-card blockquote { font-size: calc(clamp(14px, 2.5dvh, 30px) * var(--latest-fit)); line-height: 1.35; margin: 0 0 1dvh; white-space: normal; overflow-wrap: anywhere; }
+.projection-mode #proyector .latest-footer { font-size: calc(clamp(10px, 1.6dvh, 18px) * var(--latest-fit)); padding-top: 1dvh; }
+.projection-mode #proyector .impact-grid { min-height: 0; grid-template-columns: 1fr 1fr 1.2fr; margin: 0; }
+.projection-mode #proyector .impact-grid article { min-height: 0; padding: 0 1.5vw; gap: 1vw; }
+.projection-mode #proyector .impact-grid article:first-child { padding-left: 0; }
+.projection-mode #proyector .impact-grid strong { font-size: clamp(18px, min(2.4vw, 3.8dvh), 42px); line-height: 1.15; }
+.projection-mode #proyector .impact-grid p { font-size: clamp(10px, min(1.3vw, 1.8dvh), 20px); line-height: 1.25; margin: .6dvh 0 0; }
+.projection-mode #proyector .impact-grid .message-stat { grid-column: auto; margin: 0; border-top: 0; }
+.projection-mode #proyector .quote-mark { font-size: clamp(24px, 5dvh, 58px); }
+.projection-mode .connection-notice:not([hidden]) { position: fixed; top: 8px; left: 12px; right: 12px; z-index: 20; margin: 0; }
+@media (orientation: portrait) {
+  .projection-mode #proyector { grid-template-rows: minmax(0, .7fr) minmax(0, 3.5fr) minmax(0, .6fr); gap: 10px; }
+  .projection-mode #proyector .campaign-header { grid-template-columns: 1fr 1.3fr; gap: 12px; }
+  .projection-mode #proyector .campaign-side { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .projection-mode #proyector .campaign-message { font-size: clamp(15px, 3.5vw, 30px); }
+  .projection-mode #proyector .organizer-signature { flex-direction: row; align-items: center; gap: 6px; }
+  .projection-mode #proyector .organizer { width: 80px; }
+  .projection-mode #proyector .live-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .projection-mode #proyector .total-card, .projection-mode #proyector .latest-card { padding: 12px 16px; }
+  .projection-mode #proyector .overline { font-size: 14px; }
+  .projection-mode #proyector .total { font-size: clamp(36px, min(17cqw, 10dvh), 100px); }
+  .projection-mode #proyector .support-tag { font-size: 10px; margin-top: 4px; }
+  .projection-mode #proyector .progress-heading, .projection-mode #proyector .goal-row { font-size: 11px; gap: 6px; }
+  .projection-mode #proyector .progress-heading strong, .projection-mode #proyector .goal-row strong, .projection-mode #proyector .goal-row > span:first-child { font-size: 12px; }
+  .projection-mode #proyector .latest-card .card-top { margin-bottom: 5px; }
+  .projection-mode #proyector .latest-amount { margin: 6px 0; }
+  .projection-mode #proyector .impact-grid strong { font-size: clamp(12px, 3vw, 24px); }
+  .projection-mode #proyector .impact-grid p { font-size: 9px; }
+  .projection-mode #proyector .stat-icon { display: none; }
+}

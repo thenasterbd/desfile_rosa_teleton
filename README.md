@@ -121,3 +121,6 @@ npx supabase functions deploy manage-operators --project-ref ijbyhoiwfpdlgviuoed
 ```
 
 El login se completa en tu navegador. No compartas el token por chat ni lo guardes en el repositorio. Los dos despliegues usan `supabase/config.toml`, que configura la validación de sesión en los handlers. Después de publicar, vuelve a abrir la gestión de usuarios. La migración SQL de permisos y operadores activos también debe estar ejecutada, según los pasos anteriores.
+
+
+La vista **Proyector → Pantalla completa** distribuye el encabezado, la recaudación, el último aporte y los indicadores dentro de la altura visible, sin desplazamiento. El texto del último aporte se ajusta para mostrar nombres y mensajes completos. Al salir con Esc se recupera el diseño habitual; las vistas de operador y ajustes conservan su desplazamiento normal.

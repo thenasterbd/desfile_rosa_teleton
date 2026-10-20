@@ -23,6 +23,10 @@ function setAccountMenu(open) {
   $('#account-menu').hidden = !visible;
   $('[data-view="ajustes"]').setAttribute('aria-expanded', String(visible));
 }
+function syncProjectionMode() {
+  document.documentElement.classList.toggle('projection-mode', !!document.fullscreenElement && !$('#proyector').hidden);
+}
+document.addEventListener('fullscreenchange', syncProjectionMode);
 function navigate() {
   let view = ['proyector', 'operador', 'ajustes'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'proyector';
   if (view === 'operador' && !canOperate) {
@@ -30,6 +34,7 @@ function navigate() {
   }
   setAccountMenu(view === 'ajustes');
   document.querySelectorAll('.view').forEach(el => { el.hidden = el.id !== view; });
+  syncProjectionMode();
   document.querySelectorAll('[data-view]').forEach(el => { const active = el.dataset.view === view; el.classList.toggle('active', active); if (active) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
 }
 addEventListener('hashchange', navigate); navigate();

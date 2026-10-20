@@ -5,6 +5,22 @@ export function setupProjector(chime) {
   let previous, shown = 0, animation;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const butterflies = setupButterflies($('#proyector'));
+  let fitFrame;
+  function fitLatest() {
+    cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(() => {
+      const card = $('.latest-card');
+      card.style.removeProperty('--latest-fit');
+      if (!document.documentElement.classList.contains('projection-mode')) return;
+      // Preserve complete names/messages instead of truncating them on short screens.
+      for (let scale = .95; card.scrollHeight > card.clientHeight + 1 && scale >= .35; scale -= .05) {
+        card.style.setProperty('--latest-fit', scale.toFixed(2));
+      }
+    });
+  }
+  new ResizeObserver(fitLatest).observe($('.latest-card'));
+  document.addEventListener('fullscreenchange', fitLatest);
+  document.fonts.ready.then(fitLatest);
   function animate(target) {
     cancelAnimationFrame(animation);
     $('#total').classList.toggle('long-total', money(target).length > 13);
@@ -46,5 +62,6 @@ export function setupProjector(chime) {
       window.confetti({ particleCount: 160, spread: 90, origin: { y: .65 }, colors: ['#FC568D', '#E02D69', '#F93873', '#FFFFFF'], disableForReducedMotion: true });
     }
     previous = { ...s };
+    fitLatest();
   });
 }
