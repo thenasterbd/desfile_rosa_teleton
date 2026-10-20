@@ -1,4 +1,4 @@
-import { addDonation, editDonation, subscribe, money } from './supabase-config.js';
+import { addDonation, editDonation, deleteDonation, subscribe, money } from './supabase-config.js';
 import { errorMessage, toast } from './app.js';
 export function setupOperator() {
   const form = document.querySelector('#donation-form'), amount = document.querySelector('#amount'), button = document.querySelector('#donate'), feedback = document.querySelector('#donation-feedback');
@@ -35,11 +35,24 @@ export function setupOperator() {
     catch (error) { editFeedback.textContent = errorMessage(error); editFeedback.classList.add('error'); }
     finally { editingBusy = false; editForm.querySelectorAll('input, textarea, button').forEach(el => { el.disabled = false; }); }
   });
+  const deleteDialog = document.querySelector('#delete-dialog'), deleteForm = document.querySelector('#delete-form'), deleteFeedback = document.querySelector('#delete-feedback');
+  let deleting, deleteEvent, deletingBusy = false;
+  document.querySelector('#cancel-delete').addEventListener('click', () => deleteDialog.close());
+  deleteDialog.addEventListener('cancel', e => { if (deletingBusy) e.preventDefault(); });
+  deleteForm.addEventListener('submit', async e => {
+    e.preventDefault(); if (deletingBusy || !deleting || !canEdit) return;
+    deletingBusy = true; deleteFeedback.textContent = ''; deleteFeedback.classList.remove('error');
+    deleteForm.querySelectorAll('button').forEach(el => { el.disabled = true; });
+    try { await deleteDonation(deleting, deleteEvent); deleteDialog.close(); toast('Aporte eliminado. El total se actualizó.'); }
+    catch (error) { deleteFeedback.textContent = errorMessage(error); deleteFeedback.classList.add('error'); }
+    finally { deletingBusy = false; deleteForm.querySelectorAll('button').forEach(el => { el.disabled = false; }); }
+  });
   let lastHistory = '';
   subscribe(({ history, mode, isAdmin, state }) => {
     canEdit = mode === 'demo' || isAdmin;
     currentEvent = state.generation;
     if (dialog.open && (!canEdit || currentEvent !== editEvent)) dialog.close();
+    if (deleteDialog.open && (!canEdit || currentEvent !== deleteEvent)) deleteDialog.close();
     const signature = JSON.stringify([history, canEdit]);
     if (signature === lastHistory) return;
     lastHistory = signature;
@@ -62,7 +75,15 @@ export function setupOperator() {
         document.querySelector('#edit-message').value = d.message;
         editFeedback.textContent = ''; editFeedback.classList.remove('error'); dialog.showModal();
       });
-      actions.append(edit); row.append(donor, value, time, actions); body.append(row);
+      const remove = document.createElement('button');
+      remove.type = 'button'; remove.className = 'text-button delete-donation'; remove.textContent = 'Eliminar'; remove.disabled = !canEdit;
+      remove.setAttribute('aria-label', `Eliminar aporte de ${d.name}`);
+      remove.addEventListener('click', () => {
+        deleting = { ...d }; deleteEvent = currentEvent;
+        document.querySelector('#delete-summary').textContent = `${d.name} · ${money(d.amountCents)}`;
+        deleteFeedback.textContent = ''; deleteFeedback.classList.remove('error'); deleteDialog.showModal(); document.querySelector('#cancel-delete').focus();
+      });
+      actions.className = 'donation-actions'; actions.append(edit, remove); row.append(donor, value, time, actions); body.append(row);
     }
   });
 }

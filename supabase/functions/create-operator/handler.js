@@ -23,6 +23,9 @@ export function createOperatorHandler({ createClient, url, serviceKey, allowedOr
       const { data: principal, error: roleError } = await admin.from('user_administration').select('user_id').eq('id', 1).eq('user_id', auth.user.id).maybeSingle();
       if (roleError) return reply(503, 'La administración de usuarios no está disponible.');
       if (!principal) return reply(403, 'Solo la cuenta principal puede registrar usuarios.');
+      const { data: activePrincipal, error: activeError } = await admin.from('operators').select('user_id').eq('user_id', auth.user.id).eq('is_active', true).maybeSingle();
+      if (activeError) return reply(503, 'La administración de usuarios necesita actualizarse.');
+      if (!activePrincipal) return reply(403, 'Tu cuenta no tiene acceso.');
       if (Number(request.headers.get('content-length')) > 8192) return reply(413, 'Solicitud demasiado grande.');
       let body;
       try {

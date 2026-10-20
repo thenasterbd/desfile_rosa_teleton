@@ -80,7 +80,7 @@ La cuenta principal confirmada es `bladimirduarte30@gmail.com`. Solo esa cuenta 
 Activación en el proyecto existente:
 
 1. Ejecuta `supabase/migrations/20261019_user_management.sql` en **Supabase → SQL Editor**. La cuenta principal debe existir en Authentication. La migración conserva las donaciones y los operadores existentes.
-2. Despliega la Edge Function desde la raíz del repositorio con Supabase CLI: `supabase login`, después `supabase functions deploy create-operator --project-ref ijbyhoiwfpdlgviuoedo`. Usa el archivo `supabase/config.toml` incluido. La función verifica el token con Auth y comprueba la cuenta principal en cada solicitud.
+2. Ejecuta también `supabase/migrations/20261019_delete_and_manage.sql` para actualizar los permisos de operadores activos. Después despliega la Edge Function desde la raíz del repositorio con Supabase CLI: `supabase login`, después `supabase functions deploy create-operator --project-ref ijbyhoiwfpdlgviuoedo`. Usa el archivo `supabase/config.toml` incluido. La función verifica el token con Auth y comprueba la cuenta principal en cada solicitud.
 3. En **Authentication → Providers → Email**, desactiva **Allow new users to sign up**. Las altas administrativas de la función siguen funcionando. Cierra e inicia sesión con la cuenta principal para cargar su menú.
 
 La función usa `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`, que Supabase proporciona en su servidor. Nunca copies la clave administrativa en la web ni en GitHub. El origen permitido por defecto es `https://thenasterbd.github.io`; si usas otro dominio, configura `ALLOWED_ORIGINS` en los secretos de la función con los orígenes separados por comas. La tabla `user_administration` solo permite que un usuario lea su propio permiso: los clientes no pueden escribir en ella ni en `operators`.
@@ -88,3 +88,25 @@ La función usa `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`, que Supabase propo
 Para instalaciones nuevas, ejecuta `supabase/schema.sql`, crea la cuenta principal en Authentication y luego ejecuta la migración de administración. Las funciones de servidor no se publican como archivos estáticos de GitHub Pages.
 
 Verifica las comprobaciones del servidor con `node --test tests/create-operator.test.mjs`. Son pruebas locales con respuestas simuladas de Auth y base de datos; no crean cuentas reales.
+
+
+### Eliminar aportes y administrar operadores
+
+**Aportes recientes → Eliminar** abre una confirmación con el donante y el monto. Confirmar elimina el aporte, descuenta el monto y reduce el contador; si era el último, el proyector muestra el aporte anterior. Cancelar conserva los datos. Las ediciones concurrentes se comprueban antes de borrar, y un reintento no descuenta dos veces.
+
+Solo la cuenta principal ve **Meta y ajustes → Administrar usuarios**. Puede deshabilitar y habilitar operadores y cambiarles la contraseña. Cada cambio requiere confirmación. La cuenta principal está protegida frente a estas acciones. Deshabilitar conserva los aportes del usuario y revoca los permisos de escritura incluso si conserva un JWT válido; además se solicita el bloqueo de inicio de sesión en Auth. Cambiar una contraseña no habilita una cuenta deshabilitada ni concede permisos administrativos.
+
+Para activar esta actualización en un proyecto existente:
+
+1. Si todavía no activaste el registro de usuarios, ejecuta primero `supabase/migrations/20261019_user_management.sql`.
+2. Ejecuta **completo** `supabase/migrations/20261019_delete_and_manage.sql` en Supabase → SQL Editor. No borra aportes ni usuarios. Actualiza las cinco funciones de escritura para comprobar que el operador esté activo. No vuelvas a ejecutar migraciones anteriores de las funciones de escritura después de esta actualización.
+3. Despliega o actualiza ambas funciones desde la raíz del repositorio:
+
+```sh
+supabase functions deploy create-operator --project-ref ijbyhoiwfpdlgviuoedo
+supabase functions deploy manage-operators --project-ref ijbyhoiwfpdlgviuoedo
+```
+
+Usa el `supabase/config.toml` incluido: cada función valida la sesión y el permiso principal dentro del servidor. Las claves administrativas permanecen en Supabase. Mantén desactivado el registro público en Authentication. Las instalaciones nuevas ya incluyen la columna `is_active` y la eliminación en `supabase/schema.sql`.
+
+Pruebas de autorización de ambas funciones: `node --test tests/*.test.mjs`.

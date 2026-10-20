@@ -368,3 +368,17 @@ dialog.event-modal::backdrop { background: #3f1b3466; backdrop-filter: blur(7px)
   .event-modal .dialog-actions { flex-direction: column-reverse; }
   .event-modal .dialog-actions .button { width: 100%; }
 }
+
+.donation-actions { white-space: nowrap; }
+.donation-actions .text-button + .text-button { margin-left: 14px; }
+.delete-donation { color: #b91c50; min-height: 44px; }
+.event-modal .confirmation-summary { padding: 16px; border: 1px solid #f1c8d8; border-radius: 12px; background: #fff4f8; color: var(--fg); font-weight: 600; }
+#manage-dialog.event-modal { width: min(640px, calc(100% - 32px)); max-width: 640px; }
+.managed-user { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.managed-user strong { display: block; overflow-wrap: anywhere; font-size: 14px; }
+.managed-user p { margin: 6px 0 12px; }
+.managed-user-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.managed-user-actions .button { padding: 10px 12px; }
+.user-pagination { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 18px 0; font-size: 12px; }
+#manage-form { margin: 24px 0; padding: 20px; background: #fff6fa; border: 1px solid #edc7d8; border-radius: 16px; }
+#manage-form h3 { font-size: 18px; margin-bottom: 10px; }

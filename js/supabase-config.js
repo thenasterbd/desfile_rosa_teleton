@@ -17,8 +17,8 @@ export function cents(value) {
 const listeners = new Set();
 const mode = new URLSearchParams(location.search).get('demo') === '1' ? 'demo' : 'supabase';
 let state = initial(), history = [], connection = 'Iniciando…', ready = false, user = null, isAdmin = false, isOwner = false, client, realtime = false, sessionRevision = 0;
-export function subscribe(fn) { listeners.add(fn); fn({ state, history, mode, connection, ready, user, isAdmin, isOwner }); return () => listeners.delete(fn); }
-function emit() { for (const fn of listeners) fn({ state, history, mode, connection, ready, user, isAdmin, isOwner }); }
+export function subscribe(fn) { listeners.add(fn); fn({ state, history: history.slice(0, 30), mode, connection, ready, user, isAdmin, isOwner }); return () => listeners.delete(fn); }
+function emit() { for (const fn of listeners) fn({ state, history: history.slice(0, 30), mode, connection, ready, user, isAdmin, isOwner }); }
 function readLocal() {
   const raw = localStorage.getItem(STATE_KEY);
   const data = raw ? JSON.parse(raw) : { state: initial(), history: [] };
@@ -41,6 +41,7 @@ export function databaseError(error) {
   if (error?.code === '22023') return error.message;
   if (error?.code === '23514') return 'El importe o el total supera los límites admitidos.';
   if (error?.code === 'invalid_credentials') return 'Correo o contraseña incorrectos.';
+  if (error?.code === 'user_banned') return 'Esta cuenta está deshabilitada. Contacta a la organización.';
   if (error?.code === 'email_not_confirmed') return 'Confirma tu correo antes de iniciar sesión.';
   if (error?.status === 429) return 'Espera unos minutos antes de volver a intentarlo.';
   return 'No se pudo completar la operación. Revisa tu conexión e inténtalo de nuevo.';
@@ -84,7 +85,7 @@ export async function addDonation(data, id) {
     if (history.some(d => d.id === id)) return;
     if (!Number.isSafeInteger(state.totalCents + donation.amountCents)) throw new Error('El total supera el límite admitido.');
     state = { ...state, totalCents: state.totalCents + donation.amountCents, count: state.count + 1, last: donation };
-    history = [donation, ...history].slice(0, 30);
+    history = [donation, ...history];
   });
   return mutation('register_donation', { p_id: id, p_event_id: state.generation, p_amount_cents: donation.amountCents, p_donor_name: donation.name, p_message: donation.message });
 }
@@ -106,6 +107,19 @@ export async function editDonation(original, data, eventId) {
     state = { ...state, totalCents, last: state.last?.id === item.id ? updated : state.last };
   });
   return mutation('edit_donation', { p_id: original.id, p_event_id: eventId, p_amount_cents: desired.amountCents, p_donor_name: desired.name, p_message: desired.message, p_expected: expected });
+}
+export async function deleteDonation(original, eventId) {
+  writable();
+  const expected = { amountCents: original.amountCents, name: original.name, message: original.message };
+  if (mode === 'demo') return localChange(() => {
+    if (state.generation !== eventId) throw new Error('El evento cambió. Vuelve a abrir el aporte.');
+    const item = history.find(d => d.id === original.id);
+    if (!item) return;
+    if (JSON.stringify(expected) !== JSON.stringify({ amountCents: item.amountCents, name: item.name, message: item.message })) throw new Error('El aporte fue modificado. Cierra esta ventana y vuelve a abrirlo antes de eliminarlo.');
+    history = history.filter(d => d.id !== item.id);
+    state = { ...state, totalCents: state.totalCents - item.amountCents, count: state.count - 1, last: state.last?.id === item.id ? history[0] || null : state.last };
+  });
+  return mutation('delete_donation', { p_id: original.id, p_event_id: eventId, p_expected: expected });
 }
 export async function setGoal(value) {
   writable(); const goalCents = cents(value);
@@ -150,6 +164,17 @@ export async function createOperator(email, password) {
   }
   if (!data?.message) throw new Error('No se pudo confirmar el registro. Comprueba la cuenta antes de volver a intentarlo.');
   return data.message;
+}
+export async function manageOperator(action, details = {}) {
+  if (!client || !isOwner) throw new Error('Solo la cuenta principal puede administrar usuarios.');
+  const { data, error } = await client.functions.invoke('manage-operators', { body: { action, ...details } });
+  if (error) {
+    let message;
+    try { message = (await error.context?.json())?.message; } catch { /* Respuesta sin JSON. */ }
+    throw new Error(message || 'No se pudo completar la operación. Comprueba la conexión e inténtalo de nuevo.');
+  }
+  if (!data || (action === 'list' ? !Array.isArray(data.users) : !data.message)) throw new Error('No se pudo confirmar la operación.');
+  return data;
 }
 export async function logout() {
   if (!client) return;

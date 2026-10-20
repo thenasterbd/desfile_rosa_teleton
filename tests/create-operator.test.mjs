@@ -15,7 +15,7 @@ function fixture(overrides = {}) {
     from(table) {
       calls.push(['table', table]);
       return {
-        select: () => ({ eq: (field, value) => {
+        select: () => table === 'operators' ? { eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: overrides.inactiveOwner ? null : { user_id: 'principal-id' } }) }) }) } : ({ eq: (field, value) => {
           assert.equal(field, 'id'); assert.equal(value, 1);
           return { eq: (field, value) => {
             assert.equal(field, 'user_id'); assert.equal(value, 'principal-id');
@@ -43,6 +43,7 @@ test('principal creates only an operator; the supplied role is ignored', async (
   assert.equal(response.headers.get('cache-control'), 'no-store');
 });
 for (const [name, options, headers, status] of [
+  ['inactive principal', { inactiveOwner: true }, {}, 403],
   ['ordinary operator', { nonOwner: true }, {}, 403],
   ['invalid token', { invalidToken: true }, {}, 401],
   ['anonymous visitor', {}, { authorization: '' }, 401],

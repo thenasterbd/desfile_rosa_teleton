@@ -38,7 +38,7 @@ export function setupProjector(chime) {
     $('#last-time').textContent = d ? 'Un nuevo gesto de solidaridad' : 'Esperando el primer aporte';
     const sameEvent = previous && previous.generation === s.generation;
     if (previous && !sameEvent) butterflies.clear();
-    if (sameEvent && d && d.id !== previous.last?.id) {
+    if (sameEvent && s.count > previous.count && d && d.id !== previous.last?.id) {
       const card = $('.total-card'); card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow'); chime();
       butterflies.play();
     }

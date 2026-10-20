@@ -2,3 +2,7 @@
 # El handler verifica el JWT con Auth y el permiso de la cuenta principal.
 # Compatible con las nuevas claves públicas sb_publishable_.
 verify_jwt = false
+
+[functions.manage-operators]
+# Verificación de sesión y permisos dentro del handler.
+verify_jwt = false

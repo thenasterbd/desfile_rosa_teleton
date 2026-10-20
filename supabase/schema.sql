@@ -27,6 +27,8 @@ create table if not exists public.operators (
   user_id uuid primary key references auth.users(id) on delete cascade
 );
 
+alter table public.operators add column if not exists is_active boolean not null default true;
+
 -- Inicialización idempotente: repetir este archivo conserva el evento actual.
 do $$
 declare new_event uuid;
@@ -54,7 +56,7 @@ create policy settings_public_read on public.app_settings for select to anon, au
 drop policy if exists donation_public_read on public.donations;
 create policy donation_public_read on public.donations for select to anon, authenticated using (true);
 drop policy if exists operator_self_read on public.operators;
-create policy operator_self_read on public.operators for select to authenticated using (user_id = (select auth.uid()));
+create policy operator_self_read on public.operators for select to authenticated using (user_id = (select auth.uid()) and is_active);
 
 create or replace function public.register_donation(
   p_id uuid, p_event_id uuid, p_amount_cents bigint, p_donor_name text, p_message text
@@ -63,7 +65,7 @@ language plpgsql security definer set search_path = public, pg_temp
 as $$
 declare active_event uuid; item public.donations%rowtype;
 begin
-  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid()) then
+  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid() and is_active) then
     raise exception 'Operador no autorizado' using errcode = '42501';
   end if;
   if p_id is null or p_event_id is null or p_amount_cents is null or p_amount_cents not between 1 and 10000000000 then
@@ -100,7 +102,7 @@ returns void language plpgsql security definer set search_path = public, pg_temp
 as $$
 declare active_event uuid;
 begin
-  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid()) then
+  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid() and is_active) then
     raise exception 'Operador no autorizado' using errcode = '42501';
   end if;
   if p_goal_cents is null or p_goal_cents not between 1 and 10000000000 then
@@ -118,7 +120,7 @@ returns uuid language plpgsql security definer set search_path = public, pg_temp
 as $$
 declare active_event uuid; new_event uuid; current_goal bigint;
 begin
-  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid()) then
+  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid() and is_active) then
     raise exception 'Operador no autorizado' using errcode = '42501';
   end if;
   select current_event_id into active_event from public.app_settings where id = 1 for update;
@@ -170,7 +172,7 @@ create or replace function public.edit_donation(
 as $$
 declare active_event uuid; item public.donations%rowtype; previous_amount bigint; desired jsonb; current_value jsonb;
 begin
-  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid()) then
+  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid() and is_active) then
     raise exception 'Operador no autorizado' using errcode = '42501';
   end if;
   if p_id is null or p_event_id is null or p_amount_cents is null or p_amount_cents not between 1 and 10000000000 then
@@ -218,5 +220,37 @@ drop policy if exists administrator_self_read on public.user_administration;
 create policy administrator_self_read on public.user_administration for select to authenticated
   using (user_id = (select auth.uid()));
 grant select on public.user_administration to service_role;
-grant select, insert, delete on public.operators to service_role;
+grant select, insert, update, delete on public.operators to service_role;
+create or replace function public.delete_donation(p_id uuid, p_event_id uuid, p_expected jsonb)
+returns void language plpgsql security definer set search_path = public, pg_temp
+as $$
+declare active_event uuid; item public.donations%rowtype; latest public.donations%rowtype;
+begin
+  if auth.uid() is null or not exists(select 1 from public.operators where user_id = auth.uid() and is_active) then
+    raise exception 'Operador no autorizado' using errcode = '42501';
+  end if;
+  if p_id is null or p_event_id is null then
+    raise exception 'Identificador no válido' using errcode = '22023';
+  end if;
+  select current_event_id into active_event from public.app_settings where id = 1 for update;
+  if active_event is null or active_event <> p_event_id then
+    raise exception 'El evento cambió. Vuelve a abrir el aporte.' using errcode = '22023';
+  end if;
+  select * into item from public.donations where id = p_id and event_id = active_event for update;
+  -- Un reintento de una eliminación confirmada no vuelve a descontar el monto.
+  if not found then return; end if;
+  if p_expected is null or p_expected <> jsonb_build_object('amountCents',item.amount_cents,'name',item.donor_name,'message',item.message) then
+    raise exception 'El aporte fue modificado. Cierra esta ventana y vuelve a abrirlo antes de eliminarlo.' using errcode = '22023';
+  end if;
+  delete from public.donations where id = item.id;
+  select * into latest from public.donations where event_id = active_event order by created_at desc, id desc limit 1;
+  update public.events set total_cents = total_cents - item.amount_cents,
+    donation_count = donation_count - 1,
+    last_donation = case when latest.id is null then null else
+      jsonb_build_object('id',latest.id,'amountCents',latest.amount_cents,'name',latest.donor_name,'message',latest.message,'createdAt',latest.created_at) end
+    where id = active_event;
+end $$;
+revoke all on function public.delete_donation(uuid, uuid, jsonb) from public, anon;
+grant execute on function public.delete_donation(uuid, uuid, jsonb) to authenticated;
+
 commit;

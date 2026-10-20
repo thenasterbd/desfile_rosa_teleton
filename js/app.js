@@ -1,4 +1,5 @@
 import { initialize, subscribe, login, logout, createOperator, setGoal, resetEvent } from './supabase-config.js';
+import { setupUsers } from './usuarios.js';
 import { setupOperator } from './operador.js';
 import { setupProjector } from './proyector.js';
 const $ = selector => document.querySelector(selector);
@@ -148,4 +149,4 @@ subscribe(({ mode, connection, ready, user, isAdmin, isOwner, state }) => {
   if (accessChanged) navigate();
   if (document.activeElement !== $('#goal-input')) $('#goal-input').value = state.goalCents / 100;
 });
-setupOperator(); setupProjector(chime); initialize();
+setupOperator(); setupUsers(toast); setupProjector(chime); initialize();

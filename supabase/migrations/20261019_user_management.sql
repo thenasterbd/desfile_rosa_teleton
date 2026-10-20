@@ -12,7 +12,7 @@ drop policy if exists administrator_self_read on public.user_administration;
 create policy administrator_self_read on public.user_administration for select to authenticated
   using (user_id = (select auth.uid()));
 grant select on public.user_administration to service_role;
-grant select, insert, delete on public.operators to service_role;
+grant select, insert, update, delete on public.operators to service_role;
 -- Cuenta principal confirmada por la organización. Nunca se toma del formulario web.
 do $$
 declare principal uuid;
