@@ -1,3 +1,4 @@
+import { operatorFunctionError } from './operator-function-errors.js';
 // Estos datos identifican la API pública. La seguridad reside en RLS y las RPC.
 // Nunca se debe poner aquí una clave secret/service_role.
 export const supabaseConfig = Object.freeze({
@@ -158,9 +159,7 @@ export async function createOperator(email, password) {
   if (!client || !isOwner) throw new Error('Solo la cuenta principal puede registrar usuarios.');
   const { data, error } = await client.functions.invoke('create-operator', { body: { email, password } });
   if (error) {
-    let message;
-    try { message = (await error.context?.json())?.message; } catch { /* Sin respuesta JSON disponible. */ }
-    throw new Error(message || 'No se pudo registrar al usuario. Comprueba la conexión y vuelve a intentarlo.');
+    throw new Error(await operatorFunctionError(error, 'No se pudo registrar al usuario. Comprueba la conexión y vuelve a intentarlo.', `${supabaseConfig.url}/functions/v1/create-operator`));
   }
   if (!data?.message) throw new Error('No se pudo confirmar el registro. Comprueba la cuenta antes de volver a intentarlo.');
   return data.message;
@@ -169,9 +168,7 @@ export async function manageOperator(action, details = {}) {
   if (!client || !isOwner) throw new Error('Solo la cuenta principal puede administrar usuarios.');
   const { data, error } = await client.functions.invoke('manage-operators', { body: { action, ...details } });
   if (error) {
-    let message;
-    try { message = (await error.context?.json())?.message; } catch { /* Respuesta sin JSON. */ }
-    throw new Error(message || 'No se pudo completar la operación. Comprueba la conexión e inténtalo de nuevo.');
+    throw new Error(await operatorFunctionError(error, 'No se pudo completar la operación. Comprueba la conexión e inténtalo de nuevo.', `${supabaseConfig.url}/functions/v1/manage-operators`));
   }
   if (!data || (action === 'list' ? !Array.isArray(data.users) : !data.message)) throw new Error('No se pudo confirmar la operación.');
   return data;

@@ -110,3 +110,14 @@ supabase functions deploy manage-operators --project-ref ijbyhoiwfpdlgviuoedo
 Usa el `supabase/config.toml` incluido: cada función valida la sesión y el permiso principal dentro del servidor. Las claves administrativas permanecen en Supabase. Mantén desactivado el registro público en Authentication. Las instalaciones nuevas ya incluyen la columna `is_active` y la eliminación en `supabase/schema.sql`.
 
 Pruebas de autorización de ambas funciones: `node --test tests/*.test.mjs`.
+
+
+Si al registrar o listar usuarios Supabase devuelve `404` con `Requested function was not found`, falta publicar las Edge Functions. GitHub Pages publica la web, pero no despliega funciones de Supabase. Desde la raíz del repositorio ejecuta:
+
+```sh
+npx supabase login
+npx supabase functions deploy create-operator --project-ref ijbyhoiwfpdlgviuoedo
+npx supabase functions deploy manage-operators --project-ref ijbyhoiwfpdlgviuoedo
+```
+
+El login se completa en tu navegador. No compartas el token por chat ni lo guardes en el repositorio. Los dos despliegues usan `supabase/config.toml`, que configura la validación de sesión en los handlers. Después de publicar, vuelve a abrir la gestión de usuarios. La migración SQL de permisos y operadores activos también debe estar ejecutada, según los pasos anteriores.
