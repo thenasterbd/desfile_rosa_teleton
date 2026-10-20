@@ -87,5 +87,5 @@ export function setupButterflies(projector, onIdle = () => {}) {
 
   reduced.addEventListener('change', () => { if (reduced.matches) clear(); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) clear(); });
-  return { play, clear };
+  return { play, clear, isFlying: () => active.size > 0 };
 }

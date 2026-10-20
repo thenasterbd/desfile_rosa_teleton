@@ -1,11 +1,26 @@
+import { setupFireworks } from './fuegos.js';
 import { subscribe, money } from './supabase-config.js';
 import { setupMessages } from './mensajes.js';
 import { setupButterflies } from './mariposas.js';
 export function setupProjector(eventAudio) {
   const $ = selector => document.querySelector(selector);
-  let previous, shown = 0, animation, goalCelebrated = false;
+  let previous, shown = 0, animation, goalCelebrated = false, pendingCelebration = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const butterflies = setupButterflies($('#proyector'), () => eventAudio.stopFlutter());
+  const fireworks = setupFireworks($('#proyector'));
+  const visible = () => !$('#proyector').hidden && !document.hidden;
+  function startCelebration() {
+    if (!pendingCelebration) return;
+    pendingCelebration = false;
+    if (!visible()) return;
+    fireworks.start(); eventAudio.celebrate();
+  }
+  function cancelCelebration() { pendingCelebration = false; fireworks.stop(); eventAudio.stop(); }
+  const butterflies = setupButterflies($('#proyector'), () => {
+    eventAudio.stopFlutter(); startCelebration();
+  });
+  new MutationObserver(() => { if (!visible()) cancelCelebration(); })
+    .observe($('#proyector'), { attributes: true, attributeFilter: ['hidden'] });
+  document.addEventListener('visibilitychange', () => { if (!visible()) cancelCelebration(); });
   setupMessages($('#proyector'));
   let fitFrame;
   function fitLatest() {
@@ -57,8 +72,9 @@ export function setupProjector(eventAudio) {
     const sameEvent = previous && previous.generation === s.generation;
     if (!previous || !sameEvent) {
       goalCelebrated = s.totalCents >= s.goalCents;
-      if (previous) { butterflies.clear(); eventAudio.stop(); }
+      if (previous) { cancelCelebration(); butterflies.clear(); }
     }
+    if (pendingCelebration && s.totalCents < s.goalCents) { pendingCelebration = false; goalCelebrated = false; }
     if (sameEvent && s.count > previous.count && d && d.id !== previous.last?.id) {
       const card = $('.total-card'); card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow');
       const flightDuration = butterflies.play();
@@ -67,10 +83,8 @@ export function setupProjector(eventAudio) {
     const reachedGoal = sameEvent && !goalCelebrated && s.totalCents > previous.totalCents && previous.totalCents < s.goalCents && s.totalCents >= s.goalCents;
     if (reachedGoal) {
       goalCelebrated = true;
-      eventAudio.celebrate();
-      if (!$('#proyector').hidden && !document.hidden && !reduced.matches && typeof window.confetti === 'function') {
-        window.confetti({ particleCount: 160, spread: 90, origin: { y: .65 }, colors: ['#FC568D', '#E02D69', '#F93873', '#FFFFFF'], disableForReducedMotion: true });
-      }
+      pendingCelebration = true;
+      if (!butterflies.isFlying()) startCelebration();
     }
     previous = { ...s };
     fitLatest();

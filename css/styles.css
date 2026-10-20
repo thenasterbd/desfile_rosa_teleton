@@ -419,3 +419,5 @@ dialog.event-modal::backdrop { background: #3f1b3466; backdrop-filter: blur(7px)
   .projection-mode #proyector .impact-grid p { font-size: 9px; }
   .projection-mode #proyector .stat-icon { display: none; }
 }
+
+.fireworks-layer { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 16; }
