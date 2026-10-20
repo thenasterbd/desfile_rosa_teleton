@@ -1,22 +1,13 @@
+import { createEventAudio } from './sonidos.js';
 import { initialize, subscribe, login, logout, createOperator, setGoal, resetEvent } from './supabase-config.js';
 import { setupUsers } from './usuarios.js';
 import { setupOperator } from './operador.js';
 import { setupProjector } from './proyector.js';
 const $ = selector => document.querySelector(selector);
-let audio, sound = localStorage.getItem('rosa-sound') === 'true';
-export function chime() {
-  if (!sound || !audio || audio.state !== 'running') return;
-  const now = audio.currentTime;
-  [659.25, 830.61, 987.77].forEach((frequency, index) => {
-    const osc = audio.createOscillator(), gain = audio.createGain();
-    osc.type = 'sine'; osc.frequency.value = frequency;
-    gain.gain.setValueAtTime(0, now + index * .12);
-    gain.gain.linearRampToValueAtTime(.10, now + index * .12 + .015);
-    gain.gain.exponentialRampToValueAtTime(.001, now + index * .12 + 1.1);
-    osc.connect(gain); gain.connect(audio.destination);
-    osc.start(now + index * .12); osc.stop(now + index * .12 + 1.2);
-  });
-}
+let sound = localStorage.getItem('rosa-sound') === 'true';
+const eventAudio = createEventAudio({ enabled: sound, canPlay: () => !$('#proyector').hidden && !document.hidden });
+new MutationObserver(() => { if ($('#proyector').hidden) eventAudio.stop(); })
+  .observe($('#proyector'), { attributes: true, attributeFilter: ['hidden'] });
 let canOperate = false, requestedOperator = false, menuAvailable = false;
 function setAccountMenu(open) {
   const visible = open && menuAvailable;
@@ -66,16 +57,30 @@ export function errorMessage(error) {
   return error.message || 'No se pudo completar la operación.';
 }
 $('#fullscreen').addEventListener('click', async () => { try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); } catch { toast('El navegador no permite pantalla completa. Puedes usar F11.'); } });
-$('#sound').checked = sound;
+function syncSoundControls() {
+  $('#sound').checked = sound;
+  const label = sound ? 'Silenciar' : 'Activar sonido';
+  $('#projector-sound span').textContent = label;
+  $('#projector-sound').setAttribute('aria-label', label);
+  $('#projector-sound').setAttribute('aria-pressed', String(sound));
+  $('#projector-sound').title = label;
+}
+syncSoundControls();
 $('#sound-status').textContent = sound ? 'Haz clic en la página para habilitar el audio del navegador.' : 'Sonido desactivado';
 async function activateAudio() {
   if (!sound) return;
-  try { audio ||= new (window.AudioContext || window.webkitAudioContext)(); await audio.resume(); $('#sound-status').textContent = 'Sonido activado en este dispositivo'; }
+  try { const activated = await eventAudio.activate(); $('#sound-status').textContent = activated ? 'Sonido activado en este dispositivo' : 'Haz clic en la página para habilitar el sonido.'; }
   catch { $('#sound-status').textContent = 'El navegador no pudo activar el sonido.'; }
 }
 addEventListener('pointerdown', activateAudio);
 addEventListener('keydown', activateAudio);
-$('#sound').addEventListener('change', async e => { sound = e.target.checked; localStorage.setItem('rosa-sound', String(sound)); if (sound) { await activateAudio(); chime(); } else $('#sound-status').textContent = 'Sonido desactivado'; });
+async function setSound(value) {
+  sound = value; localStorage.setItem('rosa-sound', String(sound));
+  eventAudio.setEnabled(sound); syncSoundControls();
+  if (sound) await activateAudio(); else $('#sound-status').textContent = 'Sonido desactivado';
+}
+$('#sound').addEventListener('change', e => setSound(e.target.checked));
+$('#projector-sound').addEventListener('click', () => setSound(!sound));
 $('#login-form').addEventListener('submit', async e => { e.preventDefault(); const button = e.target.querySelector('[type=submit]'); button.disabled = true; try { await login($('#email').value.trim(), $('#password').value); $('#password').value = ''; feedback('#login-feedback', ''); if (requestedOperator) { requestedOperator = false; location.hash = 'operador'; } else $('#goal-input').focus(); } catch (error) { feedback('#login-feedback', errorMessage(error), true); } finally { button.disabled = false; } });
 document.querySelectorAll('[data-logout]').forEach(button => button.addEventListener('click', async () => {
   document.querySelectorAll('[data-logout]').forEach(el => { el.disabled = true; });
@@ -154,4 +159,4 @@ subscribe(({ mode, connection, ready, user, isAdmin, isOwner, state }) => {
   if (accessChanged) navigate();
   if (document.activeElement !== $('#goal-input')) $('#goal-input').value = state.goalCents / 100;
 });
-setupOperator(); setupUsers(toast); setupProjector(chime); initialize();
+setupOperator(); setupUsers(toast); setupProjector(eventAudio); initialize();

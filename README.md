@@ -124,3 +124,10 @@ El login se completa en tu navegador. No compartas el token por chat ni lo guard
 
 
 La vista **Proyector → Pantalla completa** distribuye el encabezado, la recaudación, el último aporte y los indicadores dentro de la altura visible, sin desplazamiento. El texto del último aporte se ajusta para mostrar nombres y mensajes completos. Al salir con Esc se recupera el diseño habitual; las vistas de operador y ajustes conservan su desplazamiento normal.
+
+
+### Sonidos del evento
+
+En el proyector, pulsa **Activar sonido** antes de entrar en pantalla completa. También puedes usar el interruptor de **Meta y ajustes**; la preferencia se guarda por dispositivo. El navegador requiere una interacción para habilitar audio, incluso cuando ya estaba activado.
+
+Cada nuevo aporte genera aleteos suaves. Al alcanzar la meta mediante un incremento de la recaudación, el proyector reproduce 60 segundos de aplausos sintetizados, fanfarrias y silbidos de festejo. La celebración se dispara una sola vez por evento; no se reproduce al cargar aportes históricos ni al bajar la meta. Cambiar de vista, ocultar la pestaña, silenciar o reiniciar el evento detiene los sonidos. Los efectos se generan con Web Audio API sin archivos externos y con control de volumen y compresión.
