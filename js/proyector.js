@@ -5,7 +5,7 @@ export function setupProjector(eventAudio) {
   const $ = selector => document.querySelector(selector);
   let previous, shown = 0, animation, goalCelebrated = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const butterflies = setupButterflies($('#proyector'));
+  const butterflies = setupButterflies($('#proyector'), () => eventAudio.stopFlutter());
   setupMessages($('#proyector'));
   let fitFrame;
   function fitLatest() {
@@ -60,8 +60,9 @@ export function setupProjector(eventAudio) {
       if (previous) { butterflies.clear(); eventAudio.stop(); }
     }
     if (sameEvent && s.count > previous.count && d && d.id !== previous.last?.id) {
-      const card = $('.total-card'); card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow'); eventAudio.flutter();
-      butterflies.play();
+      const card = $('.total-card'); card.classList.remove('glow'); void card.offsetWidth; card.classList.add('glow');
+      const flightDuration = butterflies.play();
+      eventAudio.flutter(flightDuration);
     }
     const reachedGoal = sameEvent && !goalCelebrated && s.totalCents > previous.totalCents && previous.totalCents < s.goalCents && s.totalCents >= s.goalCents;
     if (reachedGoal) {

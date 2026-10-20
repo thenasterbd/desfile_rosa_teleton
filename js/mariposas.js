@@ -2,7 +2,7 @@ const butterflyURL = new URL('../assets/butterfly.svg', import.meta.url).href;
 const MAX_BUTTERFLIES = 160;
 
 // Decoration only: no input handling, data writes or external dependencies.
-export function setupButterflies(projector) {
+export function setupButterflies(projector, onIdle = () => {}) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const layer = document.createElement('div');
   layer.className = 'butterfly-layer';
@@ -13,9 +13,11 @@ export function setupButterflies(projector) {
   preload.src = butterflyURL;
 
   function remove(particle) {
+    if (!active.has(particle)) return;
     active.get(particle)?.cancel();
     active.delete(particle);
     particle.remove();
+    if (active.size === 0) onIdle();
   }
 
   function clear() {
@@ -23,7 +25,7 @@ export function setupButterflies(projector) {
   }
 
   function play() {
-    if (projector.hidden || reduced.matches || document.hidden || typeof layer.animate !== 'function') return;
+    if (projector.hidden || reduced.matches || document.hidden || typeof layer.animate !== 'function') return 0;
     const width = innerWidth, height = innerHeight;
     const count = width < 700 ? 40 : 72;
     const limit = width < 700 ? 80 : MAX_BUTTERFLIES;
@@ -75,6 +77,9 @@ export function setupButterflies(projector) {
       // Cancellation also settles this promise; never leave rejected animations.
       flight.finished.then(() => remove(particle), () => remove(particle));
     }
+    // Duración real restante de todos los vuelos, incluidos los aportes solapados.
+    return Math.max(0, ...Array.from(active.values(), flight =>
+      flight.effect.getComputedTiming().endTime - (flight.currentTime || 0)));
   }
 
   new MutationObserver(() => { if (projector.hidden) clear(); })

@@ -70,3 +70,35 @@ test('backgrounding the page stops the celebration immediately', async t => {
   document.hidden = true; document.dispatchEvent(new Event('visibilitychange'));
   assert(f.sources.every(s => s.stops.includes(undefined)));
 });
+test('flutter continues for the supplied flight duration and stops at its end', async t => {
+  const f = fixture(t); await f.audio.activate(); f.audio.flutter(8400);
+  f.context.currentTime = 5; t.mock.timers.tick(100);
+  assert(f.sources.some(source => source.startAt >= 5));
+  for (const source of f.sources) for (const stop of source.stops) if (stop !== undefined) assert(stop <= 8.4);
+  f.context.currentTime = 8.5; t.mock.timers.tick(100);
+  assert(f.sources.every(source => source.stops.includes(undefined)));
+});
+test('overlapping donations extend the existing flutter without layering another loop', async t => {
+  const f = fixture(t); await f.audio.activate(); f.audio.flutter(8000);
+  const count = f.sources.length; f.context.currentTime = 5; f.audio.flutter(8000);
+  assert.equal(f.sources.length, count);
+  f.context.currentTime = 12; t.mock.timers.tick(100);
+  assert(f.sources.some(source => source.startAt >= 12));
+  f.context.currentTime = 13.1; t.mock.timers.tick(100);
+  assert(f.sources.every(source => source.stops.includes(undefined)));
+});
+test('ending butterfly flights does not interrupt goal applause', async t => {
+  const f = fixture(t); await f.audio.activate(); f.audio.celebrate();
+  const applause = [...f.sources]; f.audio.flutter(8000); f.audio.stopFlutter();
+  assert(applause.every(source => !source.stops.includes(undefined)));
+  assert(f.sources.slice(applause.length).every(source => source.stops.includes(undefined)));
+  f.audio.stop();
+});
+test('ending goal applause does not cut a later butterfly flight short', async t => {
+  const f = fixture(t); await f.audio.activate(); f.audio.celebrate();
+  f.context.currentTime = 59; t.mock.timers.tick(59000);
+  const count = f.sources.length; f.audio.flutter(5000); const wings = f.sources.slice(count);
+  t.mock.timers.tick(1000);
+  assert(wings.length > 0 && wings.every(source => !source.stops.includes(undefined)));
+  f.audio.stop();
+});
